@@ -140,8 +140,8 @@ export default defineConfig({
   compressHTML: false,
   vite: {
     root: projectRoot,
-    // 开发时用 '/' 避免注入的 @vite/client 等脚本路径变成 //@vite/client 导致 404
-    base: process.env.NODE_ENV === 'development' ? '/' : './',
+    // 开发与生产均用 '/'，避免部署后相对路径导致资源 404（NOT_FOUND）
+    base: '/',
     define: {
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
