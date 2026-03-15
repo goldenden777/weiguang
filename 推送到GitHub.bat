@@ -6,8 +6,7 @@ git add .
 git status
 git commit -m "first commit"
 if errorlevel 1 (
-    echo Nothing to commit or commit failed. Continue to push? Check above.
-    pause
+    echo No new changes to commit. Pushing existing commits...
 )
 echo.
 
