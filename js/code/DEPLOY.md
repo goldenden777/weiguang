@@ -93,7 +93,15 @@ server {
 
 ---
 
-### 方式 D：Docker 静态服务（可选）
+### 方式 D：Vercel 部署（避免 NOT_FOUND / 404）
+
+1. 在 Vercel 项目设置中，将 **Root Directory** 设为 **`js/code`**（不要用仓库根目录），这样构建和输出都会在正确目录。
+2. 本仓库已在 `js/code` 下提供 **`vercel.json`**，其中 `"cleanUrls": true` 会让 Vercel 把无后缀路径映射到对应 `.html`（例如访问 `/page-2659759` 会返回 `page-2659759.html`），避免出现 NOT_FOUND。
+3. 部署后用 `https://你的域名/page-2659759` 或 `https://你的域名/home` 访问即可；若仍 404，请检查 Root Directory 是否为 `js/code` 且构建成功生成了 `dist`。
+
+---
+
+### 方式 E：Docker 静态服务（可选）
 
 若希望用 Docker 跑一个简单 HTTP 服务，可在 `js/code` 同级目录建 `Dockerfile`：
 
