@@ -1,0 +1,24 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import MobileTabBar from '@/components/common/MobileTabBar.vue'
+import EnrollmentQueryContent from '@/components/enrollment-query/EnrollmentQueryContent.vue'
+---
+
+<BaseLayout title="报名查询 - 微光公益" description="使用手机号查询公益活动报名记录" mode="mobile">
+  <CommonHeader client:load variant="guest" mode="mobile" />
+
+  <main class="flex-1 px-4 py-8 pb-24">
+    <div class="max-w-xl mx-auto space-y-6">
+      <div class="text-center space-y-2">
+        <h1 class="text-2xl font-bold text-foreground tracking-tight">报名查询</h1>
+        <p class="text-sm text-muted-foreground">输入报名时使用的手机号，即可查看您的报名记录与状态</p>
+      </div>
+      <EnrollmentQueryContent client:load />
+    </div>
+  </main>
+
+  <CommonFooter client:load variant="simple" layout="mobile" />
+  <MobileTabBar client:load />
+</BaseLayout>

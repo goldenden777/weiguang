@@ -1,0 +1,28 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import EnrollmentDataContent from '@/components/enrollment-data-detail/EnrollmentDataContent.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+
+const breadcrumbs = [
+  { label: '工作台', href: './agency-dashboard.html' },
+  { label: '我的活动', href: './agency-activity-list.html' },
+  { label: '报名数据详情' },
+]
+---
+
+<BaseLayout title="报名数据详情 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="agency,admin" />
+  <CommonHeader client:load variant="agency" userName="执行机构" mode="desktop" />
+  
+  <main class="flex-1 bg-slate-50/50 min-h-screen">
+    <PageHeader 
+      title="报名数据详情"
+      breadcrumbs={breadcrumbs}
+    />
+    
+    <EnrollmentDataContent client:load />
+  </main>
+</BaseLayout>

@@ -1,0 +1,40 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+---
+
+<BaseLayout title="免责声明 - 微光公益" description="青岛微光慈善基金会公益活动免责声明" mode="mobile">
+  <CommonHeader client:load variant="guest" mode="mobile" />
+
+  <main class="flex-1 px-4 py-8 pb-24">
+    <div class="mx-auto max-w-2xl space-y-6">
+      <h1 class="text-xl font-bold text-foreground">免责声明</h1>
+      <div class="prose prose-sm max-w-none text-muted-foreground space-y-4">
+        <p>
+          青岛微光慈善基金会（以下简称「本基金会」）在此郑重提示：本网站所发布的公益活动信息及报名服务，均基于公益目的提供。参与本基金会组织的各类活动，即表示您已阅读、理解并同意以下条款。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">一、活动参与</h2>
+        <p>
+          本活动为公益性质，报名参与者需身体健康，并遵守现场安全指引。参与过程中请自行妥善保管个人财物，本基金会对非因组织方原因造成的人身及财产损失不承担责任。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">二、信息使用</h2>
+        <p>
+          您报名时提交的姓名、电话等信息，仅用于本次活动联络与组织，本基金会将按《隐私政策》予以保护，不会用于与活动无关之用途。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">三、免责范围</h2>
+        <p>
+          因不可抗力、参与者自身原因或第三方行为导致的损害，本基金会在法律允许范围内不承担赔偿责任。如有疑问，请通过网站所载联系方式与我们沟通。
+        </p>
+        <p class="text-sm mt-8">
+          最后更新：2026年3月 · 青岛微光慈善基金会
+        </p>
+      </div>
+      <p class="text-sm">
+        <a href="./home.html" class="text-primary hover:underline">返回首页</a>
+      </p>
+    </div>
+  </main>
+
+  <CommonFooter client:load variant="simple" layout="mobile" />
+</BaseLayout>

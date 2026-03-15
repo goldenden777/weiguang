@@ -1,0 +1,30 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import ActivityProposalForm from '@/components/activity-proposal-form/ActivityProposalForm.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="活动提报 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="agency" />
+  <CommonHeader client:load variant="agency" userName="执行机构" mode="desktop" />
+  
+  <main class="min-h-[calc(100vh-64px)] flex flex-col bg-muted/20">
+    <PageHeader 
+      title="新建活动提报"
+      breadcrumbs={[
+        { label: '工作台', href: './agency-dashboard.html' },
+        { label: '新建活动提报' }
+      ]}
+    />
+
+    <div class="flex-1 px-8 py-8 w-full max-w-[1400px] mx-auto">
+      <ActivityProposalForm client:load />
+    </div>
+  </main>
+
+  <CommonFooter layout="desktop" />
+</BaseLayout>

@@ -1,0 +1,19 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import MobileTabBar from '@/components/common/MobileTabBar.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import UserInfoDetail from '@/components/page-2651560/UserInfoDetail.vue'
+---
+
+<BaseLayout title="用户信息详情 - 微光公益" mode="mobile">
+  <CommonHeader client:load variant="guest" mode="mobile" />
+  
+  <main class="flex-1 overflow-y-auto pb-20">
+    <UserInfoDetail client:load />
+  </main>
+
+  <CommonFooter variant="simple" layout="mobile" />
+  <MobileTabBar client:idle />
+</BaseLayout>

@@ -1,0 +1,337 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <meta name="color-scheme" content="light">
+                  <meta name="supported-color-schemes" content="light">
+                  <title>已上架活动列表</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login': '后台登录页',
+    'agency_dashboard': '执行机构工作台',
+    'activity_proposal_form': '活动提报表单页',
+    'admin_dashboard': '管理员控制台',
+    'activity_audit_list': '活动审核管理页',
+    'activity_detail_view': '活动详情审核页',
+    'home': '门户首页',
+    'activity_detail': '活动详情页',
+    'enrollment_success': '报名成功反馈页',
+    'agency_activity_list': '机构活动管理',
+    'admin_all_activities': '全量活动管理',
+    'enrollment_data_detail': '报名数据详情',
+    'user_account_management': '用户与执行机构管理',
+    'system_config_center': '系统配置中心',
+    'activity_advanced_editor': '活动高级内容编辑页',
+    'activity_past_archive_manager': '往期活动回顾发布页',
+    'page_2651559': '用户注册页面',
+    'page_2651560': '用户信息详情',
+    'page_2659759': '已上架活动列表'
+                }
+                const allPageIds = ["login","agency_dashboard","activity_proposal_form","admin_dashboard","activity_audit_list","activity_detail_view","home","activity_detail","enrollment_success","agency_activity_list","admin_all_activities","enrollment_data_detail","user_account_management","system_config_center","activity_advanced_editor","activity_past_archive_manager","page_2651559","page_2651560","page_2659759"]
+                const allFormatPageIdsMap = {"login":"login","agency_dashboard":"agency-dashboard","activity_proposal_form":"activity-proposal-form","admin_dashboard":"admin-dashboard","activity_audit_list":"activity-audit-list","activity_detail_view":"activity-detail-view","home":"home","activity_detail":"activity-detail","enrollment_success":"enrollment-success","agency_activity_list":"agency-activity-list","admin_all_activities":"admin-all-activities","enrollment_data_detail":"enrollment-data-detail","user_account_management":"user-account-management","system_config_center":"system-config-center","activity_advanced_editor":"activity-advanced-editor","activity_past_archive_manager":"activity-past-archive-manager","page_2651559":"page-2651559","page_2651560":"page-2651560","page_2659759":"page-2659759"}
+                const IFRAME_MESSAGE_TYPE = {
+                  iframeNavigation: 'iframeNavigation',
+                }
+                const safeAddEventListener = function Tc(e,t,r,n=!1){e.removeEventListener(t,r,n),e.addEventListener(t,r,n)}
+                const processOnclick = (e,t,r)=>{if(r){const n=Rw(t);if(n.methodName&&Lp(n.methodName,r))return;e.preventDefault(),e.stopPropagation();const s=n.args||[],i=(s==null?void 0:s.find(u=>u))||"";i&&Mp(i)}}
+                const checkIframeMethod = (e,t)=>{try{return typeof t[e]=="function"||typeof t[e]=="function"}catch(r){return!1}}
+                const postIframeMessage = (targetPageId) => {
+                  window.parent.postMessage({
+                    type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                    targetPageId,
+                  })
+                }
+                const handleIframeLinkClick = (event) => {
+                  const dynamicIframe = document.querySelector('#dynamicIframe')
+                  if (!dynamicIframe?.contentWindow) {
+                    return
+                  }
+                  const link = event.target.closest('a')
+                  const target = event.target
+                  if (link) {
+                    const href = link.getAttribute('href')
+                    const onclick = link.getAttribute('onclick')
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      const targetPageId = getKeyByValueObj(allFormatPageIdsMap, href)
+                      if (targetPageId) {
+                        postIframeMessage(targetPageId)
+                      }
+                      return
+                    }
+                    if (onclick) {
+                      processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                    } else {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }
+                    return
+                  }
+                  const onclick = target.getAttribute('onclick')
+                  if (onclick) {
+                    processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                  }
+                }
+                function stringExt(link) {
+                  let s = String(link || '')
+                  s = (s.split('#')[0] || '')
+                  s = (s.split('?')[0] || '')
+                  s = s.trim()
+                  s = s.split('/').filter(Boolean).pop() || ''
+                  const lower = s.toLowerCase()
+                  if (lower.endsWith('.html') || lower.endsWith('.php') || lower.endsWith('.aspx')) {
+                    s = s.slice(0, s.lastIndexOf('.'))
+                  }
+                  return s
+                }
+                function formatHref(href) {
+                  if (!href) {
+                    return ''
+                  }
+                  try {
+                    const url = new URL(href, window.location.href)
+                    const pathname = url.pathname || ''
+                    return stringExt(pathname)
+                  } catch {
+                    return stringExt(href)
+                  }
+                }
+                function getKeyByValueObj(obj, value) {
+                  const newValue = formatHref(value)
+                  const keyFind = Object.keys(obj).find(k => k === newValue)
+                  if (keyFind) {
+                    return keyFind
+                  }
+                  return Object.keys(obj).find(k => obj[k] === newValue)
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                function setupIframeEvents() {
+                  const iframe = document.getElementById('dynamicIframe')
+                  if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    safeAddEventListener(iframe.contentWindow.document, 'click', handleIframeLinkClick, true)
+                  } else {
+                    setTimeout(setupIframeEvents, 100)
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = function() {
+                  adjustIframeSize()
+                  setupIframeEvents()
+                }
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="18" data-source-line-end="43" lang="zh-CN"><head data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="19" data-source-line-end="24"><script>(function(){
+      function stringExt(link) {
+        let s = String(link || &#39;&#39;)
+        s = (s.split(&#39;#&#39;)[0] || &#39;&#39;)
+        s = (s.split(&#39;?&#39;)[0] || &#39;&#39;)
+        s = s.trim()
+        s = s.split(&#39;/&#39;).filter(Boolean).pop() || &#39;&#39;
+        const lower = s.toLowerCase()
+        if (lower.endsWith(&#39;.html&#39;) || lower.endsWith(&#39;.php&#39;) || lower.endsWith(&#39;.aspx&#39;)) {
+          s = s.slice(0, s.lastIndexOf(&#39;.&#39;))
+        }
+        return s
+      }
+      function formatHref(href) {
+        if (!href) {
+          return &#39;&#39;
+        }
+        try {
+          const url = new URL(href, window.location.href)
+          const pathname = url.pathname || &#39;&#39;
+          return stringExt(pathname)
+        } catch {
+          return stringExt(href)
+        }
+      }
+      function getKeyByValueObj(obj, value) {
+        const newValue = formatHref(value)
+        const keyFind = Object.keys(obj).find(k => k === newValue)
+        if (keyFind) {
+          return keyFind
+        }
+        return Object.keys(obj).find(k => obj[k] === newValue)
+      }
+      function emit(to, source){
+        try {
+          if (window.parent) {
+            const allFormatPageIdsMap = {"login":"login","agency_dashboard":"agency-dashboard","activity_proposal_form":"activity-proposal-form","admin_dashboard":"admin-dashboard","activity_audit_list":"activity-audit-list","activity_detail_view":"activity-detail-view","home":"home","activity_detail":"activity-detail","enrollment_success":"enrollment-success","agency_activity_list":"agency-activity-list","admin_all_activities":"admin-all-activities","enrollment_data_detail":"enrollment-data-detail","user_account_management":"user-account-management","system_config_center":"system-config-center","activity_advanced_editor":"activity-advanced-editor","activity_past_archive_manager":"activity-past-archive-manager","page_2651559":"page-2651559","page_2651560":"page-2651560","page_2659759":"page-2659759"}
+            const IFRAME_MESSAGE_TYPE = {
+              iframeNavigation: &#39;iframeNavigation&#39;,
+            }
+            const targetPageId = getKeyByValueObj(allFormatPageIdsMap, String(to || &#39;&#39;))
+            if (targetPageId) {
+              window.parent.postMessage({
+                type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                targetPageId,
+              }, &#39;*&#39;)
+            }
+          }
+        } catch(e) {}
+      }
+      try{
+        if (&#39;navigation&#39; in window &amp;&amp; window.navigation &amp;&amp; typeof window.navigation.addEventListener===&#39;function&#39;){
+          window.navigation.addEventListener(&#39;navigate&#39;, function(e){
+            try{
+              var url = (e.destination &amp;&amp; e.destination.url) || &#39;&#39;;
+              if (e.canIntercept &amp;&amp; typeof e.intercept===&#39;function&#39;){ e.intercept({ handler:function(){} }) }
+              else if (e.preventDefault){ e.preventDefault() }
+              emit(url)
+            }catch(_){}
+          })
+        }
+      }catch(_){}
+    })();</script><meta name="supported-color-schemes" content="light"><meta name="color-scheme" content="light"><style>
+      :root, html, body { color-scheme: light; }
+      html { forced-color-adjust: none; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Built with Astro">
+    <title data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="23" data-source-line-end="23">已上架活动列表 - 微光公益</title>
+  <link rel="stylesheet" href="./assets/html/105936/activity-advanced-editor.IwUQJicz.css">
+<style>.transition-all[data-v-fbc3ea3b]{transition:opacity .3s ease-out,transform .3s ease-out}
+</style><script src="./assets/static/uxbot/25_6/holder.js"></script><style>
+#irpuf {
+  border-radius: 9999px;
+  flex-flow: row;
+}
+
+#iz0t {
+  flex-flow: row;
+}
+
+</style></head>
+<body data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="25" data-source-line-end="42" class="min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div class="mx-auto w-full max-w-[430px] min-h-screen bg-background shadow-2xl relative overflow-x-hidden border-x border-border/50 flex flex-col font-sans">
+        
+  <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&amp;&amp;(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&amp;&amp;this.lastChild.nodeValue==="astro:end"&amp;&amp;(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&amp;&amp;await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="20ICeA" prefix="s0" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/CommonHeader.BAdA6dDe.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{&amp;quot;variant&amp;quot;:[0,&amp;quot;guest&amp;quot;],&amp;quot;mode&amp;quot;:[0,&amp;quot;mobile&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;CommonHeader&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="49" data-source-line-end="117"><div class="container mx-auto px-4" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="50" data-source-line-end="116"><div class="flex h-16 items-center justify-between" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="51" data-source-line-end="115"><div class="flex items-center space-x-6 lg:space-x-12" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="53" data-source-line-end="72"><a href="./home.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="54" data-source-line-end="62"><div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-background" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="55" data-source-line-end="57"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/6c1ebe9f-386a-4af7-a485-1aa7f93a6fd2.png" alt="Logo" class="w-full h-full object-contain" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="56" data-source-line-end="56"></div><span class="text-xl font-bold tracking-tight" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="61" data-source-line-end="61">青岛微光慈善基金会</span></a><!----></div><div class="flex items-center space-x-4" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="75" data-source-line-end="114"><div class="flex items-center space-x-2" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="77" data-source-line-end="85"><!----><a class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-5" href="./login.html" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--> 登录 <!--]--></a></div></div></div></div></header><!--astro:end--></astro-island>
+  
+  <main data-source-file="src/pages/page-2659759.astro" data-source-line-start="12" data-source-line-end="14" class="flex-1 pb-4">
+    <script>(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value=="object"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};"requestIdleCallback"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event("astro:idle"));})();</script><astro-island uid="Z1rDDzG" prefix="s1" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/ArchivedActivityList.DcBF1rFI.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{}" ssr="" client="idle" opts="{&amp;quot;name&amp;quot;:&amp;quot;ArchivedActivityList&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><div class="min-h-screen bg-background" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="141" data-source-line-end="229" data-v-fbc3ea3b=""><div class="sticky top-0 z-40 bg-background border-b border-border" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="143" data-source-line-end="192" data-v-fbc3ea3b=""><div class="px-4 py-4 space-y-4" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="144" data-source-line-end="191" data-v-fbc3ea3b=""><div class="flex items-center gap-2" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="146" data-source-line-end="151" data-v-fbc3ea3b=""><a href="./home.html" class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="147" data-source-line-end="150" data-v-fbc3ea3b=""><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-fbc3ea3b="" class="lucide lucide-chevron-left-icon lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg><span data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="149" data-source-line-end="149" data-v-fbc3ea3b="">返回首页</span></a></div><h1 class="text-2xl font-bold" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="154" data-source-line-end="154" data-v-fbc3ea3b="">可报名活动</h1><div class="flex gap-2" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="157" data-source-line-end="176" data-v-fbc3ea3b=""><div class="flex-1 relative" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="158" data-source-line-end="166" data-v-fbc3ea3b=""><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none lucide-search-icon lucide-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-fbc3ea3b=""><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg><input class="flex w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-9 h-9 text-sm" type="text" placeholder="搜索活动或机构..." data-source-file="src/components/ui/input/Input.vue" data-source-line-start="23" data-source-line-end="23" data-v-fbc3ea3b="" value=""></div><!----></div><div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="179" data-source-line-end="190" data-v-fbc3ea3b=""><!--[--><button class="inline-flex items-center justify-center gap-2 font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 whitespace-nowrap text-xs" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-fbc3ea3b=""><!--[-->助学<!--]--></button><button class="inline-flex items-center justify-center gap-2 font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 whitespace-nowrap text-xs" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-fbc3ea3b=""><!--[-->助老<!--]--></button><button class="inline-flex items-center justify-center gap-2 font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 whitespace-nowrap text-xs" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-fbc3ea3b=""><!--[-->环保<!--]--></button><button class="inline-flex items-center justify-center gap-2 font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 whitespace-nowrap text-xs" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-fbc3ea3b=""><!--[-->社区服务<!--]--></button><!--]--></div></div></div><div class="px-4 py-6 space-y-4" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="195" data-source-line-end="228" data-v-fbc3ea3b=""><div class="text-sm text-muted-foreground" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="197" data-source-line-end="199" data-v-fbc3ea3b=""> 找到 <span class="font-semibold text-foreground" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="198" data-source-line-end="198" data-v-fbc3ea3b="">6</span> 个活动 </div><div class="grid grid-cols-1 gap-4" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="202" data-source-line-end="218" data-v-fbc3ea3b=""><!--[--><div class="transition-all duration-300 opacity-100 translate-y-0" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="203" data-source-line-end="217" data-v-fbc3ea3b=""><div class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-sm transition-shadow" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-fbc3ea3b=""><!--[--><div class="flex flex-col md:flex-row" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="122" data-source-line-end="169"><div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="123" data-source-line-end="133"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/fbb32d79-c0d4-4e1e-8ca1-caaa831664d9.png" alt="青岛海滨公园环保清洁志愿服务" class="w-full h-full object-cover" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="124" data-source-line-end="129"></div><div class="flex-1 p-6" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="135" data-source-line-end="168"><div class="flex items-start justify-between gap-4" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="136" data-source-line-end="167"><div class="flex-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="137" data-source-line-end="157"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="138" data-source-line-end="143"><h3 class="text-lg font-semibold" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="139" data-source-line-end="139">青岛海滨公园环保清洁志愿服务</h3><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-success text-success-foreground border-transparent" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->可报名<!--]--></div></div><p class="text-sm text-muted-foreground line-clamp-2 mb-3" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="144" data-source-line-end="144">参与海滨公园的环境卫生清洁工作，美化城市环境，传递环保理念。</p><div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="145" data-source-line-end="156"><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="146" data-source-line-end="149"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="148" data-source-line-end="148">2024年3月15日 09:00-12:00</span></div><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="150" data-source-line-end="153"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="152" data-source-line-end="152">青岛市市南区海滨公园</span></div><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->环保<!--]--></div><span class="text-xs" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="155" data-source-line-end="155">青岛环保志愿者协会</span></div></div><!----></div></div></div><!--]--></div></div><div class="transition-all duration-300 opacity-100 translate-y-0" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="203" data-source-line-end="217" data-v-fbc3ea3b=""><div class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-sm transition-shadow" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-fbc3ea3b=""><!--[--><div class="flex flex-col md:flex-row" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="122" data-source-line-end="169"><div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="123" data-source-line-end="133"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/931c30f3-1409-4d0c-be3a-a9b509695cd1.png" alt="社区老年人关爱陪伴活动" class="w-full h-full object-cover" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="124" data-source-line-end="129"></div><div class="flex-1 p-6" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="135" data-source-line-end="168"><div class="flex items-start justify-between gap-4" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="136" data-source-line-end="167"><div class="flex-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="137" data-source-line-end="157"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="138" data-source-line-end="143"><h3 class="text-lg font-semibold" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="139" data-source-line-end="139">社区老年人关爱陪伴活动</h3><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-success text-success-foreground border-transparent" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->可报名<!--]--></div></div><p class="text-sm text-muted-foreground line-clamp-2 mb-3" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="144" data-source-line-end="144">为社区老年人提供陪伴、健康咨询和文化娱乐活动，传递温暖关怀。</p><div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="145" data-source-line-end="156"><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="146" data-source-line-end="149"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="148" data-source-line-end="148">2024年3月20日 14:00-16:00</span></div><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="150" data-source-line-end="153"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="152" data-source-line-end="152">青岛市北区社区养老中心</span></div><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->助老<!--]--></div><span class="text-xs" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="155" data-source-line-end="155">青岛社区服务中心</span></div></div><!----></div></div></div><!--]--></div></div><div class="transition-all duration-300 opacity-100 translate-y-0" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="203" data-source-line-end="217" data-v-fbc3ea3b=""><div class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-sm transition-shadow" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-fbc3ea3b=""><!--[--><div class="flex flex-col md:flex-row" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="122" data-source-line-end="169"><div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="123" data-source-line-end="133"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/9214795d-7871-48b3-8684-e36e004968a0.png" alt="乡村儿童教育支教活动" class="w-full h-full object-cover" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="124" data-source-line-end="129"></div><div class="flex-1 p-6" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="135" data-source-line-end="168"><div class="flex items-start justify-between gap-4" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="136" data-source-line-end="167"><div class="flex-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="137" data-source-line-end="157"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="138" data-source-line-end="143"><h3 class="text-lg font-semibold" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="139" data-source-line-end="139">乡村儿童教育支教活动</h3><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-[#f7f802] text-black border-transparent" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->名额已满<!--]--></div></div><p class="text-sm text-muted-foreground line-clamp-2 mb-3" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="144" data-source-line-end="144">为乡村儿童提供教育支持，开展知识讲座、兴趣班和学业辅导。</p><div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="145" data-source-line-end="156"><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="146" data-source-line-end="149"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="148" data-source-line-end="148">2024年3月25日 10:00-15:00</span></div><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="150" data-source-line-end="153"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="152" data-source-line-end="152">青岛市即墨区乡村小学</span></div><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->助学<!--]--></div><span class="text-xs" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="155" data-source-line-end="155">青岛教育志愿者团队</span></div></div><!----></div></div></div><!--]--></div></div><div class="transition-all duration-300 opacity-100 translate-y-0" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="203" data-source-line-end="217" data-v-fbc3ea3b=""><div class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-sm transition-shadow" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-fbc3ea3b=""><!--[--><div class="flex flex-col md:flex-row" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="122" data-source-line-end="169"><div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="123" data-source-line-end="133"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/50a2c020-db0e-45bf-90a2-3419aa7d1a47.png" alt="城市绿化美化志愿服务" class="w-full h-full object-cover" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="124" data-source-line-end="129"></div><div class="flex-1 p-6" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="135" data-source-line-end="168"><div class="flex items-start justify-between gap-4" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="136" data-source-line-end="167"><div class="flex-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="137" data-source-line-end="157"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="138" data-source-line-end="143"><h3 class="text-lg font-semibold" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="139" data-source-line-end="139">城市绿化美化志愿服务</h3><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-success text-success-foreground border-transparent" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->可报名<!--]--></div></div><p class="text-sm text-muted-foreground line-clamp-2 mb-3" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="144" data-source-line-end="144">参与城市绿化工作，种植花草树木，美化城市环境。</p><div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="145" data-source-line-end="156"><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="146" data-source-line-end="149"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="148" data-source-line-end="148">2024年4月01日 08:00-11:00</span></div><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="150" data-source-line-end="153"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="152" data-source-line-end="152">青岛市中山公园</span></div><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->环保<!--]--></div><span class="text-xs" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="155" data-source-line-end="155">青岛绿化志愿者协会</span></div></div><!----></div></div></div><!--]--></div></div><div class="transition-all duration-300 opacity-100 translate-y-0" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="203" data-source-line-end="217" data-v-fbc3ea3b=""><div class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-sm transition-shadow" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-fbc3ea3b=""><!--[--><div class="flex flex-col md:flex-row" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="122" data-source-line-end="169"><div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="123" data-source-line-end="133"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/24646e9a-413a-46a8-bb9e-d5fc9828abba.png" alt="残障人士康复训练陪伴" class="w-full h-full object-cover" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="124" data-source-line-end="129"></div><div class="flex-1 p-6" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="135" data-source-line-end="168"><div class="flex items-start justify-between gap-4" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="136" data-source-line-end="167"><div class="flex-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="137" data-source-line-end="157"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="138" data-source-line-end="143"><h3 class="text-lg font-semibold" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="139" data-source-line-end="139">残障人士康复训练陪伴</h3><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-success text-success-foreground border-transparent" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->可报名<!--]--></div></div><p class="text-sm text-muted-foreground line-clamp-2 mb-3" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="144" data-source-line-end="144">为残障人士提供康复训练陪伴和心理支持，帮助他们重获生活信心。</p><div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="145" data-source-line-end="156"><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="146" data-source-line-end="149"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="148" data-source-line-end="148">2024年4月05日 13:00-15:00</span></div><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="150" data-source-line-end="153"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="152" data-source-line-end="152">青岛市残疾人康复中心</span></div><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->社区服务<!--]--></div><span class="text-xs" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="155" data-source-line-end="155">青岛残疾人服务中心</span></div></div><!----></div></div></div><!--]--></div></div><div class="transition-all duration-300 opacity-100 translate-y-0" data-source-file="src/components/page-2659759/ArchivedActivityList.vue" data-source-line-start="203" data-source-line-end="217" data-v-fbc3ea3b=""><div class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-sm transition-shadow" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-fbc3ea3b=""><!--[--><div class="flex flex-col md:flex-row" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="122" data-source-line-end="169"><div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="123" data-source-line-end="133"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/273ed29c-3374-4a0a-8207-36fd23e638fb.png" alt="流浪动物救助与领养活动" class="w-full h-full object-cover" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="124" data-source-line-end="129"></div><div class="flex-1 p-6" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="135" data-source-line-end="168"><div class="flex items-start justify-between gap-4" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="136" data-source-line-end="167"><div class="flex-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="137" data-source-line-end="157"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="138" data-source-line-end="143"><h3 class="text-lg font-semibold" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="139" data-source-line-end="139">流浪动物救助与领养活动</h3><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-muted text-muted-foreground border-transparent" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->已结束<!--]--></div></div><p class="text-sm text-muted-foreground line-clamp-2 mb-3" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="144" data-source-line-end="144">参与流浪动物的救助、护理和领养工作，给予它们第二次生命。</p><div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="145" data-source-line-end="156"><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="146" data-source-line-end="149"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="148" data-source-line-end="148">2024年4月10日 10:00-16:00</span></div><div class="flex items-center gap-1" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="150" data-source-line-end="153"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="152" data-source-line-end="152">青岛市动物救助中心</span></div><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->社区服务<!--]--></div><span class="text-xs" data-source-file="src/components/common/ActivityCard.vue" data-source-line-start="155" data-source-line-end="155">青岛动物保护协会</span></div></div><!----></div></div></div><!--]--></div></div><!--]--></div></div></div><!--astro:end--></astro-island>
+  </main>
+  
+  <astro-island uid="Z10CJuy" prefix="s2" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/MobileTabBar.Dxa4820R.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{}" ssr="" client="idle" opts="{&amp;quot;name&amp;quot;:&amp;quot;MobileTabBar&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-16 bg-background/95 backdrop-blur-md border-t border-border flex items-center justify-around z-50 px-6 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="32" data-source-line-end="43"><!--[--><a href="./home.html" class="text-muted-foreground hover:text-foreground flex flex-col items-center justify-center space-y-1 transition-colors group" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="33" data-source-line-end="42"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg><span class="text-[10px] font-medium" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="41" data-source-line-end="41">首页</span></a><a href="./home.html" class="text-muted-foreground hover:text-foreground flex flex-col items-center justify-center space-y-1 transition-colors group" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="33" data-source-line-end="42"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-calendar-icon lucide-calendar"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span class="text-[10px] font-medium" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="41" data-source-line-end="41">活动</span></a><a href="./page-2651560.html" class="text-muted-foreground hover:text-foreground flex flex-col items-center justify-center space-y-1 transition-colors group" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="33" data-source-line-end="42"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="text-[10px] font-medium" data-source-file="src/components/common/MobileTabBar.vue" data-source-line-start="41" data-source-line-end="41">我的</span></a><!--]--></nav><!--astro:end--></astro-island>
+
+        <!-- Padding for sticky elements like tab bar -->
+        <div class="h-16 shrink-0"></div>
+      </div>
+  <script>
+    const originalBack = window.history.back
+    const originalForward = window.history.forward
+    const originalGo = window.history.go
+    function isValidNavigation(){
+      if(!window.parent.history.state.back || !window.parent.history.state.back.startsWith(&#39;/designPage&#39;)){
+        return false
+      }
+      return true
+    }
+    window.history.back = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalBack.apply(this, args);
+    };
+
+    window.history.forward = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalForward.apply(this, args);
+    };
+
+    window.history.go = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalGo.apply(this, args);
+    };
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

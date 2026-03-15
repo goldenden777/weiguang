@@ -1,0 +1,73 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import LoginForm from '@/components/login/LoginForm.vue'
+import LoginRedirectIfAuthenticated from '@/components/auth/LoginRedirectIfAuthenticated.vue'
+import { LOGIN_PAGE_DATA } from '@/data/login_ui.ts'
+import SafeIcon from '@/components/common/SafeIcon.vue'
+import { Button } from '@/components/ui/button'
+
+const { background, welcomeTitle, welcomeSubtitle } = LOGIN_PAGE_DATA;
+---
+
+<BaseLayout title="管理端登录 - 微光公益" mode="desktop">
+  <LoginRedirectIfAuthenticated client:load />
+  <div 
+    class="relative min-h-screen w-full flex items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden"
+    style={`background-image: url(${background})`}
+  >
+    <!-- Overlay for better readability -->
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
+
+    <!-- Top Left Home Button -->
+    <div class="absolute top-8 left-8 z-20">
+      <Button variant="outline" as="a" href="./home.html" class="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white backdrop-blur-md">
+        <SafeIcon name="ArrowLeft" :size="16" class="mr-2" />
+        返回门户首页
+      </Button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 w-full max-w-[1200px] px-6 flex flex-col lg:flex-row items-center justify-between gap-12">
+      <!-- Welcome Text (Desktop Only) -->
+      <div class="hidden lg:block flex-1 text-white space-y-6 animate-in fade-in slide-in-from-left duration-700">
+        <div class="inline-flex items-center space-x-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
+          <SafeIcon name="ShieldCheck" :size="20" color="white" />
+          <span class="text-sm font-medium">安全管理后台</span>
+        </div>
+        <h1 class="text-5xl font-bold leading-tight drop-shadow-lg">
+          {welcomeTitle}
+        </h1>
+        <p class="text-xl text-white/80 max-w-lg leading-relaxed">
+          {welcomeSubtitle}
+        </p>
+        <div class="flex items-center space-x-12 pt-8">
+          <div class="text-center">
+            <p class="text-3xl font-bold">100+</p>
+            <p class="text-white/60 text-sm">合作机构</p>
+          </div>
+          <div class="text-center">
+            <p class="text-3xl font-bold">500+</p>
+            <p class="text-white/60 text-sm">公益活动</p>
+          </div>
+          <div class="text-center">
+            <p class="text-3xl font-bold">10w+</p>
+            <p class="text-white/60 text-sm">暖心助力</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Form Card -->
+      <div class="w-full max-w-[420px] animate-in fade-in zoom-in duration-500 delay-200">
+        <LoginForm client:load />
+      </div>
+    </div>
+
+    <!-- Desktop Footer Info -->
+    <div class="absolute bottom-8 w-full text-center z-10 hidden lg:block">
+      <p class="text-white/40 text-xs">
+        © 2026 青岛微光慈善基金会 · 传递温暖，汇聚微光 · 鲁ICP备12345678号
+      </p>
+    </div>
+  </div>
+</BaseLayout>

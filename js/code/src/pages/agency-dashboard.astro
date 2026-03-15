@@ -1,0 +1,17 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import DashboardContent from '@/components/agency-dashboard/DashboardContent.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="执行机构工作台 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="agency" />
+  <CommonHeader client:load variant="agency" userName="陈运营" mode="desktop" />
+  <main class="min-h-[calc(100vh-64px)] bg-muted/30">
+    <DashboardContent client:load />
+  </main>
+  <CommonFooter client:load variant="simple" layout="desktop" />
+</BaseLayout>

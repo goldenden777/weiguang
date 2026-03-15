@@ -1,0 +1,37 @@
+
+export interface FormFieldConfig {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'tel' | 'textarea';
+  required: boolean;
+  placeholder: string;
+}
+
+export interface SiteConfig {
+  siteName: string;
+logoUrl: string;
+  contactPhone: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  disclaimer: string;
+  successMessage: string;
+  enrollmentFields: FormFieldConfig[];
+}
+
+export const SITE_CONFIG: SiteConfig = {
+  siteName: "青岛微光慈善基金会",
+  logoUrl: "https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/6c1ebe9f-386a-4af7-a485-1aa7f93a6fd2.png",
+contactPhone: "0532-88888888",
+  contactEmail: "contact@weiguang.org",
+  contactAddress: "山东省青岛市崂山区海尔路1号",
+  disclaimer: "本活动为公益性质，报名参与者需身体健康，并遵守现场安全指引。参与过程中请自行妥善保管财务，基金会不承担非组织方原因造成的人身及财产损失责任。",
+  successMessage: "报名成功，工作人员将尽快联系您",
+  enrollmentFields: [
+    { id: 'userName', label: '姓名', type: 'text', required: true, placeholder: '请输入真实姓名' },
+    { id: 'userPhone', label: '手机号', type: 'tel', required: true, placeholder: '请输入11位手机号码' },
+    { id: 'idCard', label: '身份证号', type: 'text', required: false, placeholder: '用于购买活动保险（可选）' },
+    { id: 'participantCount', label: '参与人数', type: 'number', required: true, placeholder: '请填写人数' },
+    { id: 'remark', label: '备注', type: 'textarea', required: false, placeholder: '如有特殊需求请注明' },
+  ]
+};
+      

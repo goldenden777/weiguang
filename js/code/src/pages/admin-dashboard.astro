@@ -1,0 +1,13 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import AdminDashboardContent from '@/components/admin-dashboard/AdminDashboardContent.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="管理员控制台 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="admin" />
+  <CommonHeader client:load variant="admin" userName="超级管理员" mode="desktop" />
+  <AdminDashboardContent client:load />
+</BaseLayout>

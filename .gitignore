@@ -1,0 +1,26 @@
+# 依赖与构建
+node_modules/
+dist/
+*.local
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 环境与密钥
+.env
+.env.*
+!.env.example
+
+# 临时与缓存
+.cache/
+.temp/
+*.tmp

@@ -1,0 +1,39 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import HomeHero from '@/components/home/HomeHero.vue'
+import ActivityFilterBar from '@/components/home/ActivityFilterBar.vue'
+import ActivitySection from '@/components/home/ActivitySection.vue'
+import HomeNewsSection from '@/components/home/HomeNewsSection.vue'
+import MobileTabBar from '@/components/common/MobileTabBar.vue'
+---
+
+<BaseLayout title="微光公益 - 门户首页">
+<CommonHeader client:load variant="guest" mode="mobile" />
+  
+  <main class="flex-1 flex flex-col pb-20 overflow-x-hidden">
+    <!-- Hero Section -->
+    <HomeHero client:load />
+
+    <!-- Filter & Activities Section -->
+    <div class="flex-1 bg-background pt-0">
+      <!-- Activity Filters (Sticky) -->
+      <div class="sticky top-16 z-40 bg-background/95 backdrop-blur px-4 pt-0 pb-0 border-b border-border/50">
+        <ActivityFilterBar client:load />
+      </div>
+
+      <div class="px-4 py-0 space-y-8">
+        <!-- Activity Sections -->
+        <ActivitySection client:load sectionType="popular" title="热门推荐" />
+        <ActivitySection client:load sectionType="latest" title="最新发布" />
+        <ActivitySection client:load sectionType="available" title="正在报名" />
+        <HomeNewsSection client:load :page-size="6" :show-view-all="true" />
+      </div>
+    </div>
+  </main>
+
+<CommonFooter client:load variant="simple" layout="mobile" />
+  <MobileTabBar client:load />
+</BaseLayout>

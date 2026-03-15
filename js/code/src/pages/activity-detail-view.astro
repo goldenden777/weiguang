@@ -1,0 +1,31 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import ActivityDetailViewContent from '@/components/activity-detail-view/ActivityDetailViewContent.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="活动详情审核 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="admin" />
+  <CommonHeader client:load variant="admin" userName="管理员" mode="desktop" />
+  
+  <PageHeader 
+    title="活动详情审核"
+    breadcrumbs={[
+      { label: '管理员工作台', href: './admin-dashboard.html' },
+      { label: '待审核活动', href: './activity-audit-list.html' },
+      { label: '活动详情审核' }
+    ]}
+  />
+
+  <main class="min-h-[calc(100vh-140px)] bg-background pb-12">
+    <div class="max-w-7xl mx-auto">
+      <ActivityDetailViewContent client:load />
+    </div>
+  </main>
+
+  <CommonFooter variant="simple" layout="desktop" />
+</BaseLayout>

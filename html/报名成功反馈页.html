@@ -1,0 +1,351 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <meta name="color-scheme" content="light">
+                  <meta name="supported-color-schemes" content="light">
+                  <title>报名成功反馈页</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login': '后台登录页',
+    'agency_dashboard': '执行机构工作台',
+    'activity_proposal_form': '活动提报表单页',
+    'admin_dashboard': '管理员控制台',
+    'activity_audit_list': '活动审核管理页',
+    'activity_detail_view': '活动详情审核页',
+    'home': '门户首页',
+    'activity_detail': '活动详情页',
+    'enrollment_success': '报名成功反馈页',
+    'agency_activity_list': '机构活动管理',
+    'admin_all_activities': '全量活动管理',
+    'enrollment_data_detail': '报名数据详情',
+    'user_account_management': '用户与执行机构管理',
+    'system_config_center': '系统配置中心',
+    'activity_advanced_editor': '活动高级内容编辑页',
+    'activity_past_archive_manager': '往期活动回顾发布页',
+    'page_2651559': '用户注册页面',
+    'page_2651560': '用户信息详情',
+    'page_2659759': '已上架活动列表'
+                }
+                const allPageIds = ["login","agency_dashboard","activity_proposal_form","admin_dashboard","activity_audit_list","activity_detail_view","home","activity_detail","enrollment_success","agency_activity_list","admin_all_activities","enrollment_data_detail","user_account_management","system_config_center","activity_advanced_editor","activity_past_archive_manager","page_2651559","page_2651560","page_2659759"]
+                const allFormatPageIdsMap = {"login":"login","agency_dashboard":"agency-dashboard","activity_proposal_form":"activity-proposal-form","admin_dashboard":"admin-dashboard","activity_audit_list":"activity-audit-list","activity_detail_view":"activity-detail-view","home":"home","activity_detail":"activity-detail","enrollment_success":"enrollment-success","agency_activity_list":"agency-activity-list","admin_all_activities":"admin-all-activities","enrollment_data_detail":"enrollment-data-detail","user_account_management":"user-account-management","system_config_center":"system-config-center","activity_advanced_editor":"activity-advanced-editor","activity_past_archive_manager":"activity-past-archive-manager","page_2651559":"page-2651559","page_2651560":"page-2651560","page_2659759":"page-2659759"}
+                const IFRAME_MESSAGE_TYPE = {
+                  iframeNavigation: 'iframeNavigation',
+                }
+                const safeAddEventListener = function Tc(e,t,r,n=!1){e.removeEventListener(t,r,n),e.addEventListener(t,r,n)}
+                const processOnclick = (e,t,r)=>{if(r){const n=Rw(t);if(n.methodName&&Lp(n.methodName,r))return;e.preventDefault(),e.stopPropagation();const s=n.args||[],i=(s==null?void 0:s.find(u=>u))||"";i&&Mp(i)}}
+                const checkIframeMethod = (e,t)=>{try{return typeof t[e]=="function"||typeof t[e]=="function"}catch(r){return!1}}
+                const postIframeMessage = (targetPageId) => {
+                  window.parent.postMessage({
+                    type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                    targetPageId,
+                  })
+                }
+                const handleIframeLinkClick = (event) => {
+                  const dynamicIframe = document.querySelector('#dynamicIframe')
+                  if (!dynamicIframe?.contentWindow) {
+                    return
+                  }
+                  const link = event.target.closest('a')
+                  const target = event.target
+                  if (link) {
+                    const href = link.getAttribute('href')
+                    const onclick = link.getAttribute('onclick')
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      const targetPageId = getKeyByValueObj(allFormatPageIdsMap, href)
+                      if (targetPageId) {
+                        postIframeMessage(targetPageId)
+                      }
+                      return
+                    }
+                    if (onclick) {
+                      processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                    } else {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }
+                    return
+                  }
+                  const onclick = target.getAttribute('onclick')
+                  if (onclick) {
+                    processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                  }
+                }
+                function stringExt(link) {
+                  let s = String(link || '')
+                  s = (s.split('#')[0] || '')
+                  s = (s.split('?')[0] || '')
+                  s = s.trim()
+                  s = s.split('/').filter(Boolean).pop() || ''
+                  const lower = s.toLowerCase()
+                  if (lower.endsWith('.html') || lower.endsWith('.php') || lower.endsWith('.aspx')) {
+                    s = s.slice(0, s.lastIndexOf('.'))
+                  }
+                  return s
+                }
+                function formatHref(href) {
+                  if (!href) {
+                    return ''
+                  }
+                  try {
+                    const url = new URL(href, window.location.href)
+                    const pathname = url.pathname || ''
+                    return stringExt(pathname)
+                  } catch {
+                    return stringExt(href)
+                  }
+                }
+                function getKeyByValueObj(obj, value) {
+                  const newValue = formatHref(value)
+                  const keyFind = Object.keys(obj).find(k => k === newValue)
+                  if (keyFind) {
+                    return keyFind
+                  }
+                  return Object.keys(obj).find(k => obj[k] === newValue)
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                function setupIframeEvents() {
+                  const iframe = document.getElementById('dynamicIframe')
+                  if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    safeAddEventListener(iframe.contentWindow.document, 'click', handleIframeLinkClick, true)
+                  } else {
+                    setTimeout(setupIframeEvents, 100)
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = function() {
+                  adjustIframeSize()
+                  setupIframeEvents()
+                }
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="18" data-source-line-end="43" lang="zh-CN"><head data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="19" data-source-line-end="24"><script>(function(){
+      function stringExt(link) {
+        let s = String(link || &#39;&#39;)
+        s = (s.split(&#39;#&#39;)[0] || &#39;&#39;)
+        s = (s.split(&#39;?&#39;)[0] || &#39;&#39;)
+        s = s.trim()
+        s = s.split(&#39;/&#39;).filter(Boolean).pop() || &#39;&#39;
+        const lower = s.toLowerCase()
+        if (lower.endsWith(&#39;.html&#39;) || lower.endsWith(&#39;.php&#39;) || lower.endsWith(&#39;.aspx&#39;)) {
+          s = s.slice(0, s.lastIndexOf(&#39;.&#39;))
+        }
+        return s
+      }
+      function formatHref(href) {
+        if (!href) {
+          return &#39;&#39;
+        }
+        try {
+          const url = new URL(href, window.location.href)
+          const pathname = url.pathname || &#39;&#39;
+          return stringExt(pathname)
+        } catch {
+          return stringExt(href)
+        }
+      }
+      function getKeyByValueObj(obj, value) {
+        const newValue = formatHref(value)
+        const keyFind = Object.keys(obj).find(k => k === newValue)
+        if (keyFind) {
+          return keyFind
+        }
+        return Object.keys(obj).find(k => obj[k] === newValue)
+      }
+      function emit(to, source){
+        try {
+          if (window.parent) {
+            const allFormatPageIdsMap = {"login":"login","agency_dashboard":"agency-dashboard","activity_proposal_form":"activity-proposal-form","admin_dashboard":"admin-dashboard","activity_audit_list":"activity-audit-list","activity_detail_view":"activity-detail-view","home":"home","activity_detail":"activity-detail","enrollment_success":"enrollment-success","agency_activity_list":"agency-activity-list","admin_all_activities":"admin-all-activities","enrollment_data_detail":"enrollment-data-detail","user_account_management":"user-account-management","system_config_center":"system-config-center","activity_advanced_editor":"activity-advanced-editor","activity_past_archive_manager":"activity-past-archive-manager","page_2651559":"page-2651559","page_2651560":"page-2651560","page_2659759":"page-2659759"}
+            const IFRAME_MESSAGE_TYPE = {
+              iframeNavigation: &#39;iframeNavigation&#39;,
+            }
+            const targetPageId = getKeyByValueObj(allFormatPageIdsMap, String(to || &#39;&#39;))
+            if (targetPageId) {
+              window.parent.postMessage({
+                type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                targetPageId,
+              }, &#39;*&#39;)
+            }
+          }
+        } catch(e) {}
+      }
+      try{
+        if (&#39;navigation&#39; in window &amp;&amp; window.navigation &amp;&amp; typeof window.navigation.addEventListener===&#39;function&#39;){
+          window.navigation.addEventListener(&#39;navigate&#39;, function(e){
+            try{
+              var url = (e.destination &amp;&amp; e.destination.url) || &#39;&#39;;
+              if (e.canIntercept &amp;&amp; typeof e.intercept===&#39;function&#39;){ e.intercept({ handler:function(){} }) }
+              else if (e.preventDefault){ e.preventDefault() }
+              emit(url)
+            }catch(_){}
+          })
+        }
+      }catch(_){}
+    })();</script><meta name="supported-color-schemes" content="light"><meta name="color-scheme" content="light"><style>
+      :root, html, body { color-scheme: light; }
+      html { forced-color-adjust: none; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Built with Astro">
+    <title data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="23" data-source-line-end="23">报名成功 - 微光公益</title>
+  <link rel="stylesheet" href="./assets/html/105936/activity-advanced-editor.IwUQJicz.css">
+<style>@media print{header,footer,.action-buttons[data-v-0fbb01c2]{display:none}}
+</style><script src="./assets/static/uxbot/25_6/holder.js"></script><style>
+#ita3cu {
+  align-items: flex-start;
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-start;
+}
+
+#i65jdt {
+  border-radius: 12px;
+  flex-flow: row;
+}
+
+#idzc,
+#iskbwd {
+  flex-flow: row;
+}
+
+</style></head>
+<body data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="25" data-source-line-end="42" class="min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div class="mx-auto w-full max-w-[430px] min-h-screen bg-background shadow-2xl relative overflow-x-hidden border-x border-border/50 flex flex-col font-sans">
+        
+  <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&amp;&amp;(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&amp;&amp;this.lastChild.nodeValue==="astro:end"&amp;&amp;(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&amp;&amp;await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="20ICeA" prefix="s0" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/CommonHeader.BAdA6dDe.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{&amp;quot;variant&amp;quot;:[0,&amp;quot;guest&amp;quot;],&amp;quot;mode&amp;quot;:[0,&amp;quot;mobile&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;CommonHeader&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="49" data-source-line-end="117"><div class="container mx-auto px-4" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="50" data-source-line-end="116"><div class="flex h-16 items-center justify-between" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="51" data-source-line-end="115"><div class="flex items-center space-x-6 lg:space-x-12" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="53" data-source-line-end="72"><a href="./home.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="54" data-source-line-end="62"><div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-background" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="55" data-source-line-end="57"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/6c1ebe9f-386a-4af7-a485-1aa7f93a6fd2.png" alt="Logo" class="w-full h-full object-contain" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="56" data-source-line-end="56"></div><span class="text-xl font-bold tracking-tight" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="61" data-source-line-end="61">青岛微光慈善基金会</span></a><!----></div><div class="flex items-center space-x-4" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="75" data-source-line-end="114"><div class="flex items-center space-x-2" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="77" data-source-line-end="85"><!----><a class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-5" href="./login.html" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--> 登录 <!--]--></a></div></div></div></div></header><!--astro:end--></astro-island>
+  
+  <main data-source-file="src/pages/enrollment-success.astro" data-source-line-start="13" data-source-line-end="21" class="flex-1">
+    <div data-source-file="src/pages/enrollment-success.astro" data-source-line-start="14" data-source-line-end="20" class="px-4 py-8 space-y-6">
+      <!-- Success Card -->
+      <astro-island uid="1I54uC" prefix="s1" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/SuccessCard.DEscNW-k.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;SuccessCard&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><div class="rounded-lg border text-card-foreground border-none shadow-none bg-background overflow-hidden" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20" data-v-0fbb01c2=""><!--[--><div class="px-6 py-6 text-center" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="52" data-source-line-end="64" data-v-0fbb01c2=""><div class="flex justify-center mb-6" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="53" data-source-line-end="57" data-v-0fbb01c2=""><div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center animate-in fade-in zoom-in duration-700" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="54" data-source-line-end="56" data-v-0fbb01c2=""><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-success lucide-circle-check-big-icon lucide-circle-check-big text-success" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div></div><h2 class="text-2xl font-bold text-foreground mb-3 tracking-tight" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="58" data-source-line-end="60" data-v-0fbb01c2=""> 报名提交成功 </h2><p class="text-sm text-muted-foreground leading-relaxed px-4" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="61" data-source-line-end="63" data-v-0fbb01c2=""> 工作人员将在 48 小时内完成信息核实，请保持手机通畅。 </p></div><div class="p-6 pt-0 px-4 space-y-6" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13" data-v-0fbb01c2=""><!--[--><div class="bg-muted/30 rounded-xl p-5 space-y-4 border border-border/40" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="68" data-source-line-end="97" data-v-0fbb01c2=""><div class="flex items-center justify-between" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="69" data-source-line-end="74" data-v-0fbb01c2=""><span class="text-xs font-semibold text-muted-foreground uppercase tracking-widest" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="70" data-source-line-end="70" data-v-0fbb01c2="">报名编号</span><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-success/20 text-success-foreground hover:bg-success/20 border-none text-[10px]" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16" data-v-0fbb01c2=""><!--[--> 审核中 <!--]--></div></div><div class="flex items-center justify-between gap-3" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="75" data-source-line-end="96" data-v-0fbb01c2=""><code class="text-xl font-mono font-bold text-foreground break-all" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="76" data-source-line-end="78" data-v-0fbb01c2="">BM-20260312-001</code><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md h-8 px-3 shrink-0 transition-all duration-300 text-primary" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0fbb01c2=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide mr-1.5 lucide-copy-icon lucide-copy mr-1.5" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span class="text-xs" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="94" data-source-line-end="94" data-v-0fbb01c2="">复制</span><!--]--></button></div></div><div class="space-y-4 px-1" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="100" data-source-line-end="134" data-v-0fbb01c2=""><div class="flex items-center gap-2 mb-2" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="101" data-source-line-end="104" data-v-0fbb01c2=""><div class="w-1 h-4 bg-primary rounded-full" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="102" data-source-line-end="102" data-v-0fbb01c2=""></div><h3 class="font-bold text-base text-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="103" data-source-line-end="103" data-v-0fbb01c2="">预约服务信息</h3></div><div class="grid gap-5" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="105" data-source-line-end="133" data-v-0fbb01c2=""><div class="flex items-start gap-4" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="106" data-source-line-end="114" data-v-0fbb01c2=""><div class="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="107" data-source-line-end="109" data-v-0fbb01c2=""><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary lucide-file-text-icon lucide-file-text text-primary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></div><div class="space-y-1" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="110" data-source-line-end="113" data-v-0fbb01c2=""><p class="text-[11px] text-muted-foreground uppercase tracking-tight" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="111" data-source-line-end="111" data-v-0fbb01c2="">活动课题</p><p class="text-sm font-semibold text-foreground leading-snug" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="112" data-source-line-end="112" data-v-0fbb01c2="">青岛崂山"守护夕阳"老年人陪伴活动</p></div></div><div class="flex items-start gap-4" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="115" data-source-line-end="123" data-v-0fbb01c2=""><div class="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="116" data-source-line-end="118" data-v-0fbb01c2=""><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary lucide-calendar-icon lucide-calendar text-primary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></div><div class="space-y-1" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="119" data-source-line-end="122" data-v-0fbb01c2=""><p class="text-[11px] text-muted-foreground uppercase tracking-tight" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="120" data-source-line-end="120" data-v-0fbb01c2="">预计时间</p><p class="text-sm font-semibold text-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="121" data-source-line-end="121" data-v-0fbb01c2="">2026-03-20 09:00</p></div></div><div class="flex items-start gap-4" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="124" data-source-line-end="132" data-v-0fbb01c2=""><div class="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="125" data-source-line-end="127" data-v-0fbb01c2=""><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary lucide-map-pin-icon lucide-map-pin text-primary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg></div><div class="space-y-1" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="128" data-source-line-end="131" data-v-0fbb01c2=""><p class="text-[11px] text-muted-foreground uppercase tracking-tight" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="129" data-source-line-end="129" data-v-0fbb01c2="">服务地点</p><p class="text-sm font-semibold text-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="130" data-source-line-end="130" data-v-0fbb01c2="">青岛市崂山区</p></div></div></div></div><div class="space-y-4 pt-4 border-t border-border" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="137" data-source-line-end="155" data-v-0fbb01c2=""><h3 class="font-semibold text-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="138" data-source-line-end="138" data-v-0fbb01c2="">参与者信息</h3><div class="space-y-3 text-sm" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="139" data-source-line-end="154" data-v-0fbb01c2=""><div class="flex items-center justify-between" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="140" data-source-line-end="143" data-v-0fbb01c2=""><span class="text-muted-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="141" data-source-line-end="141" data-v-0fbb01c2="">姓名</span><span class="font-medium text-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="142" data-source-line-end="142" data-v-0fbb01c2="">张三</span></div><div class="flex items-center justify-between" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="144" data-source-line-end="147" data-v-0fbb01c2=""><span class="text-muted-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="145" data-source-line-end="145" data-v-0fbb01c2="">参与人数</span><span class="font-medium text-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="146" data-source-line-end="146" data-v-0fbb01c2="">1 人</span></div><div class="flex items-center justify-between" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="148" data-source-line-end="153" data-v-0fbb01c2=""><span class="text-muted-foreground" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="149" data-source-line-end="149" data-v-0fbb01c2="">报名状态</span><div class="inline-flex gap-1 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-primary/10 text-primary border-primary/20" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16" data-v-0fbb01c2=""><!--[--> 待确认 <!--]--></div></div></div></div><!--]--></div><div class="px-4 py-8 flex flex-col gap-3" data-source-file="src/components/enrollment-success/SuccessCard.vue" data-source-line-start="159" data-source-line-end="177" data-v-0fbb01c2=""><a class="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 w-full h-12 text-base font-semibold rounded-xl shadow-lg shadow-primary/20" href="./home.html" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0fbb01c2=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide mr-2 lucide-house-icon lucide-house mr-2" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 返回首页浏览更多 <!--]--></a><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 text-secondary-foreground hover:bg-secondary/80 px-4 py-2 w-full h-12 text-sm font-medium rounded-xl border-none bg-muted/50" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0fbb01c2=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide mr-2 lucide-printer-icon lucide-printer mr-2" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0fbb01c2=""><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"></path><rect x="6" y="14" width="12" height="8" rx="1"></rect></svg> 保存当前报名凭证 <!--]--></button></div><!--]--></div><!--astro:end--></astro-island>
+      
+      <!-- Guidance Section -->
+      <astro-island uid="Z1Ap5TC" prefix="s2" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/EnrollmentGuide.pbiMr5yW.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;EnrollmentGuide&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><div class="space-y-8 pb-10" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="40" data-source-line-end="144"><div class="px-1" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="42" data-source-line-end="81"><div class="flex items-center gap-2 mb-6" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="43" data-source-line-end="46"><div class="w-1 h-4 bg-secondary rounded-full" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="44" data-source-line-end="44"></div><h3 class="font-bold text-base text-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="45" data-source-line-end="45">后续参与流程</h3></div><div class="relative space-y-8 before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-[1px] before:bg-border/60" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="48" data-source-line-end="80"><!--[--><div class="relative flex gap-5 items-start" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="49" data-source-line-end="79"><div class="relative z-10 flex-shrink-0" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="55" data-source-line-end="63"><div class="flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border/60 shadow-sm transition-all duration-300" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="56" data-source-line-end="62"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground lucide-phone-icon lucide-phone text-muted-foreground" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg></div></div><div class="flex-1 pt-1" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="66" data-source-line-end="78"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="67" data-source-line-end="74"><span class="text-[9px] uppercase font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="68" data-source-line-end="70"> STEP 01</span><h4 class="font-bold text-sm text-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="71" data-source-line-end="73">工作人员确认</h4></div><p class="text-xs text-muted-foreground leading-[1.6] bg-muted/40 p-4 rounded-xl border border-border/30" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="75" data-source-line-end="77">我们的工作人员会在 1-2 个工作日内通过您提供的电话号码与您联系，确认您的参与意愿和具体信息。</p></div></div><div class="relative flex gap-5 items-start" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="49" data-source-line-end="79"><div class="relative z-10 flex-shrink-0" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="55" data-source-line-end="63"><div class="flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border/60 shadow-sm transition-all duration-300" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="56" data-source-line-end="62"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground lucide-circle-check-big-icon lucide-circle-check-big text-muted-foreground" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div></div><div class="flex-1 pt-1" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="66" data-source-line-end="78"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="67" data-source-line-end="74"><span class="text-[9px] uppercase font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="68" data-source-line-end="70"> STEP 02</span><h4 class="font-bold text-sm text-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="71" data-source-line-end="73">确认参与</h4></div><p class="text-xs text-muted-foreground leading-[1.6] bg-muted/40 p-4 rounded-xl border border-border/30" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="75" data-source-line-end="77">确认后，您将收到活动的详细安排、集合地点、注意事项等信息。请妥善保管这些信息。</p></div></div><div class="relative flex gap-5 items-start" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="49" data-source-line-end="79"><div class="relative z-10 flex-shrink-0" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="55" data-source-line-end="63"><div class="flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border/60 shadow-sm transition-all duration-300" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="56" data-source-line-end="62"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground lucide-users-icon lucide-users text-muted-foreground" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg></div></div><div class="flex-1 pt-1" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="66" data-source-line-end="78"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="67" data-source-line-end="74"><span class="text-[9px] uppercase font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="68" data-source-line-end="70"> STEP 03</span><h4 class="font-bold text-sm text-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="71" data-source-line-end="73">按时参与</h4></div><p class="text-xs text-muted-foreground leading-[1.6] bg-muted/40 p-4 rounded-xl border border-border/30" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="75" data-source-line-end="77">请按照约定的时间和地点准时参加活动。如有特殊情况无法参加，请提前通知工作人员。</p></div></div><div class="relative flex gap-5 items-start" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="49" data-source-line-end="79"><div class="relative z-10 flex-shrink-0" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="55" data-source-line-end="63"><div class="flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border/60 shadow-sm transition-all duration-300" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="56" data-source-line-end="62"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground lucide-heart-icon lucide-heart text-muted-foreground" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"></path></svg></div></div><div class="flex-1 pt-1" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="66" data-source-line-end="78"><div class="flex items-center gap-2 mb-2" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="67" data-source-line-end="74"><span class="text-[9px] uppercase font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="68" data-source-line-end="70"> STEP 04</span><h4 class="font-bold text-sm text-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="71" data-source-line-end="73">活动反馈</h4></div><p class="text-xs text-muted-foreground leading-[1.6] bg-muted/40 p-4 rounded-xl border border-border/30" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="75" data-source-line-end="77">活动结束后，我们会邀请您填写反馈问卷，您的意见对我们改进服务非常重要。</p></div></div><!--]--></div></div><div class="bg-destructive/5 rounded-2xl p-5 border border-destructive/10" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="84" data-source-line-end="95"><div class="flex items-center gap-2 mb-4" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="85" data-source-line-end="88"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-destructive lucide-circle-alert-icon lucide-circle-alert text-destructive" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><span class="font-bold text-sm text-destructive" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="87" data-source-line-end="87">特别注意事项</span></div><ul class="space-y-3" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="89" data-source-line-end="94"><!--[--><li class="grid grid-cols-[18px_1fr] gap-1 items-start text-xs text-muted-foreground leading-relaxed" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="90" data-source-line-end="93"><span class="text-destructive/60 font-black pt-[1px]" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="91" data-source-line-end="91">•</span><span data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="92" data-source-line-end="92">请确保您提供的联系电话正确无误，以便我们及时与您沟通</span></li><li class="grid grid-cols-[18px_1fr] gap-1 items-start text-xs text-muted-foreground leading-relaxed" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="90" data-source-line-end="93"><span class="text-destructive/60 font-black pt-[1px]" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="91" data-source-line-end="91">•</span><span data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="92" data-source-line-end="92">如需修改报名信息，请在工作人员确认前联系我们</span></li><li class="grid grid-cols-[18px_1fr] gap-1 items-start text-xs text-muted-foreground leading-relaxed" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="90" data-source-line-end="93"><span class="text-destructive/60 font-black pt-[1px]" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="91" data-source-line-end="91">•</span><span data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="92" data-source-line-end="92">活动当天请提前 15 分钟到达集合地点</span></li><li class="grid grid-cols-[18px_1fr] gap-1 items-start text-xs text-muted-foreground leading-relaxed" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="90" data-source-line-end="93"><span class="text-destructive/60 font-black pt-[1px]" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="91" data-source-line-end="91">•</span><span data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="92" data-source-line-end="92">请遵守活动纪律，配合工作人员的安排</span></li><li class="grid grid-cols-[18px_1fr] gap-1 items-start text-xs text-muted-foreground leading-relaxed" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="90" data-source-line-end="93"><span class="text-destructive/60 font-black pt-[1px]" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="91" data-source-line-end="91">•</span><span data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="92" data-source-line-end="92">如有健康问题或特殊需求，请提前告知工作人员</span></li><!--]--></ul></div><div class="rounded-lg border text-card-foreground shadow-sm border-primary/20 bg-primary/5" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><h3 class="font-semibold tracking-tight text-base flex items-center gap-2" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary lucide-circle-question-mark-icon lucide-circle-question-mark text-primary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg> 需要帮助？ <!--]--></h3><!--]--></div><div class="p-6 pt-0 space-y-3 text-sm" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="flex items-center gap-3" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="106" data-source-line-end="112"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary flex-shrink-0 lucide-phone-icon lucide-phone text-primary flex-shrink-0" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg><div data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="108" data-source-line-end="111"><p class="text-muted-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="109" data-source-line-end="109">联系电话</p><p class="font-medium" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="110" data-source-line-end="110">0532-12345678</p></div></div><div class="flex items-center gap-3" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="113" data-source-line-end="119"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary flex-shrink-0 lucide-mail-icon lucide-mail text-primary flex-shrink-0" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg><div data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="115" data-source-line-end="118"><p class="text-muted-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="116" data-source-line-end="116">电子邮箱</p><p class="font-medium" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="117" data-source-line-end="117">contact@weiguang.org</p></div></div><div class="flex items-center gap-3" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="120" data-source-line-end="126"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary flex-shrink-0 lucide-clock-icon lucide-clock text-primary flex-shrink-0" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg><div data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="122" data-source-line-end="125"><p class="text-muted-foreground" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="123" data-source-line-end="123">工作时间</p><p class="font-medium" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="124" data-source-line-end="124">周一至周五 09:00-18:00</p></div></div><!--]--></div><!--]--></div><div class="rounded-lg border text-card-foreground shadow-sm border-border/50 bg-muted/30" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="p-6 pt-6" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="flex gap-3" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="133" data-source-line-end="141"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground flex-shrink-0 mt-1 lucide-shield-icon lucide-shield text-muted-foreground flex-shrink-0 mt-1" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg><div class="text-xs text-muted-foreground leading-relaxed" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="135" data-source-line-end="140"><p class="font-medium text-foreground mb-2" data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="136" data-source-line-end="136">免责声明</p><p data-source-file="src/components/enrollment-success/EnrollmentGuide.vue" data-source-line-start="137" data-source-line-end="139"> 参与本活动即表示您已阅读并同意《活动免责声明》。活动期间如发生意外，基金会将按照相关规定进行处理。请确保您身体状况适合参加此类活动。 </p></div></div><!--]--></div><!--]--></div></div><!--astro:end--></astro-island>
+    </div>
+  </main>
+
+  <astro-island uid="Z1ttFyi" prefix="s3" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/CommonFooter.Daz2Tgq9.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{&amp;quot;variant&amp;quot;:[0,&amp;quot;simple&amp;quot;],&amp;quot;layout&amp;quot;:[0,&amp;quot;mobile&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;CommonFooter&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><footer class="border-t border-border mt-auto bg-muted/30 pb-24" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="44" data-source-line-end="110"><div class="px-6 py-8 text-center space-y-4" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="49" data-source-line-end="66"><div class="flex items-center justify-center space-x-2" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="50" data-source-line-end="55"><div class="w-6 h-6 rounded-md bg-muted flex items-center justify-center" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="51" data-source-line-end="53"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground lucide-heart-icon lucide-heart text-muted-foreground" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"></path></svg></div><span class="text-sm font-semibold text-muted-foreground" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="54" data-source-line-end="54">微光公益</span></div><p class="text-[10px] text-muted-foreground/60 leading-relaxed max-w-[240px] mx-auto" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="56" data-source-line-end="60"> 传递温暖，汇聚微光<br data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="57" data-source-line-end="57"> 青岛微光慈善基金会 版权所有<br data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="58" data-source-line-end="58"> 鲁ICP备12345678号 </p><div class="flex items-center justify-center space-x-4" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="61" data-source-line-end="65"><a href="./home.html" class="text-[10px] text-muted-foreground hover:text-primary transition-colors" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="62" data-source-line-end="62">免责声明</a><span class="w-px h-2 bg-border/50" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="63" data-source-line-end="63"></span><a href="./home.html" class="text-[10px] text-muted-foreground hover:text-primary transition-colors" data-source-file="src/components/common/CommonFooter.vue" data-source-line-start="64" data-source-line-end="64">隐私协议</a></div></div></footer><!--astro:end--></astro-island>
+
+        <!-- Padding for sticky elements like tab bar -->
+        <div class="h-16 shrink-0"></div>
+      </div>
+  <script>
+    const originalBack = window.history.back
+    const originalForward = window.history.forward
+    const originalGo = window.history.go
+    function isValidNavigation(){
+      if(!window.parent.history.state.back || !window.parent.history.state.back.startsWith(&#39;/designPage&#39;)){
+        return false
+      }
+      return true
+    }
+    window.history.back = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalBack.apply(this, args);
+    };
+
+    window.history.forward = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalForward.apply(this, args);
+    };
+
+    window.history.go = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalGo.apply(this, args);
+    };
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

@@ -1,0 +1,30 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import ActivityListContainer from '@/components/agency-activity-list/ActivityListContainer.vue'
+import { Button } from '@/components/ui/button'
+import SafeIcon from '@/components/common/SafeIcon.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="机构活动管理 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="agency" />
+  <AppSidebarLayout client:load variant="agency">
+    <PageHeader title="我的活动">
+      <div slot="actions">
+        <a href="./activity-proposal-form.html">
+<Button variant="default" class="px-6">
+            <SafeIcon name="Plus" size={18} class="mr-2" />
+            新建活动提报
+          </Button>
+        </a>
+      </div>
+    </PageHeader>
+    <div class="p-6">
+      <ActivityListContainer client:load />
+    </div>
+  </AppSidebarLayout>
+</BaseLayout>

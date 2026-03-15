@@ -1,0 +1,31 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import ActivityAdvancedEditorPage from '@/components/activity-advanced-editor/ActivityAdvancedEditorPage.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+
+const breadcrumbs = [
+  { label: '管理员工作台', href: './admin-dashboard.html' },
+  { label: '全量活动管理', href: './admin-all-activities.html' },
+  { label: '活动编辑' },
+]
+---
+
+<BaseLayout title="活动高级内容编辑 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="admin" />
+  <CommonHeader client:load variant="admin" userName="管理员" mode="desktop" />
+  
+  <PageHeader 
+    title="活动高级内容编辑"
+    breadcrumbs={breadcrumbs}
+  />
+
+  <main class="flex-1 bg-background py-8">
+    <ActivityAdvancedEditorPage client:load />
+  </main>
+
+  <CommonFooter variant="simple" layout="desktop" />
+</BaseLayout>

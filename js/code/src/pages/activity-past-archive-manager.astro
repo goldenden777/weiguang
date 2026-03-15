@@ -1,0 +1,18 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.vue'
+import ActivityArchiveManager from '@/components/activity-past-archive-manager/ActivityArchiveManager.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="往期活动回顾发布 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="admin" />
+  <CommonHeader client:load variant="admin" userName="管理员" />
+  <AppSidebarLayout client:load variant="admin" headerHeight="64px">
+    <main class="flex-1 overflow-auto">
+      <ActivityArchiveManager client:load />
+    </main>
+  </AppSidebarLayout>
+</BaseLayout>

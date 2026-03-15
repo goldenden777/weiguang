@@ -1,0 +1,39 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import ActivityAuditFilters from '@/components/activity-audit-list/ActivityAuditFilters.vue'
+import ActivityAuditTable from '@/components/activity-audit-list/ActivityAuditTable.vue'
+import ActivityAuditCard from '@/components/activity-audit-list/ActivityAuditCard.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="活动审核管理 - 微光公益" mode="desktop">
+  <AuthGuard client:load required-role="admin" />
+  <CommonHeader client:load variant="admin" userName="管理员" mode="desktop" />
+  
+  <main class="min-h-[calc(100vh-64px)] bg-slate-50/50">
+    <PageHeader 
+      title="活动审核管理"
+      breadcrumbs={[
+        { label: '管理后台', href: './admin-dashboard.html' },
+        { label: '活动审核' }
+      ]}
+    >
+      <div slot="actions">
+        <span class="text-sm text-muted-foreground mr-2">待处理任务：3 项</span>
+      </div>
+    </PageHeader>
+
+    <div class="px-6 lg:px-10 py-8">
+      <!-- Filters -->
+      <ActivityAuditFilters client:load />
+
+      <!-- Table View -->
+      <div class="w-full">
+        <ActivityAuditTable client:load />
+      </div>
+    </div>
+  </main>
+</BaseLayout>

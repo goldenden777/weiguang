@@ -1,0 +1,44 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+---
+
+<BaseLayout title="隐私协议 - 微光公益" description="青岛微光慈善基金会用户隐私政策" mode="mobile">
+  <CommonHeader client:load variant="guest" mode="mobile" />
+
+  <main class="flex-1 px-4 py-8 pb-24">
+    <div class="mx-auto max-w-2xl space-y-6">
+      <h1 class="text-xl font-bold text-foreground">隐私协议</h1>
+      <div class="prose prose-sm max-w-none text-muted-foreground space-y-4">
+        <p>
+          青岛微光慈善基金会（以下简称「本基金会」）重视用户隐私。本协议说明我们如何收集、使用与保护您在使用本网站及报名公益活动时提供的信息。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">一、收集的信息</h2>
+        <p>
+          当您进行活动报名或使用「报名查询」等功能时，我们可能收集：姓名、手机号码、身份证号（选填）、参与人数、备注等您主动填写的信息，以及设备与访问日志等为保障服务所必需的技术信息。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">二、信息用途</h2>
+        <p>
+          上述信息仅用于：活动资格核实与联络、报名状态查询、活动组织与安全保障，以及法律要求或经您同意的其他用途。我们不会将您的个人信息出售给第三方。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">三、信息保护</h2>
+        <p>
+          我们采取合理的技术与管理措施保护您的个人信息安全。未经授权，工作人员不得查阅或对外提供您的个人资料。
+        </p>
+        <h2 class="text-base font-semibold text-foreground mt-6">四、您的权利</h2>
+        <p>
+          您有权查询、更正或要求删除我们持有的您的个人信息（法律另有规定除外）。如需行使上述权利或对本协议有疑问，请通过网站公示的联系方式与我们联系。
+        </p>
+        <p class="text-sm mt-8">
+          最后更新：2026年3月 · 青岛微光慈善基金会
+        </p>
+      </div>
+      <p class="text-sm">
+        <a href="./home.html" class="text-primary hover:underline">返回首页</a>
+      </p>
+    </div>
+  </main>
+
+  <CommonFooter client:load variant="simple" layout="mobile" />
+</BaseLayout>

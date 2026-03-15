@@ -1,0 +1,14 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import NewsDetailContent from '@/components/news-detail/NewsDetailContent.vue'
+---
+
+<BaseLayout title="新闻详情 - 微光公益" mode="mobile">
+  <CommonHeader client:load variant="guest" mode="mobile" />
+  <main class="flex-1 pb-24">
+    <NewsDetailContent client:load />
+  </main>
+  <CommonFooter client:load variant="simple" layout="mobile" />
+</BaseLayout>

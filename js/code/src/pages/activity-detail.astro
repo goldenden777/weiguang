@@ -1,0 +1,20 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import CommonFooter from '@/components/common/CommonFooter.vue'
+import ActivityDetailContainer from '@/components/activity-detail/ActivityDetailContainer.vue'
+
+const title = '活动详情'
+const description = '查看公益活动详情并报名参加'
+---
+
+<BaseLayout title={title} description={description} mode="mobile">
+  <CommonHeader client:load variant="guest" mode="mobile" />
+  
+  <main class="flex-1 pb-24">
+    <ActivityDetailContainer client:load />
+  </main>
+
+  <CommonFooter client:load variant="simple" layout="mobile" />
+</BaseLayout>

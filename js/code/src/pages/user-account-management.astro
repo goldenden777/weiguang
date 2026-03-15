@@ -1,0 +1,25 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CommonHeader from '@/components/common/CommonHeader.vue'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import UserAccountContent from '@/components/user-account-management/UserAccountContent.vue'
+import AuthGuard from '@/components/auth/AuthGuard.vue'
+---
+
+<BaseLayout title="用户与执行机构管理 - 管理员控制台" mode="desktop">
+  <AuthGuard client:load required-role="admin" />
+  <AppSidebarLayout client:load variant="admin">
+    <div class="flex-1 flex flex-col min-h-screen">
+      <PageHeader 
+        title="用户与执行机构管理"
+        breadcrumbs={[
+          { label: '控制台', href: './admin-dashboard.html' },
+          { label: '用户管理' }
+        ]}
+      />
+      <UserAccountContent client:load />
+    </div>
+  </AppSidebarLayout>
+</BaseLayout>

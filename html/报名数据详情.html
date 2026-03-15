@@ -1,0 +1,323 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <meta name="color-scheme" content="light">
+                  <meta name="supported-color-schemes" content="light">
+                  <title>报名数据详情</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login': '后台登录页',
+    'agency_dashboard': '执行机构工作台',
+    'activity_proposal_form': '活动提报表单页',
+    'admin_dashboard': '管理员控制台',
+    'activity_audit_list': '活动审核管理页',
+    'activity_detail_view': '活动详情审核页',
+    'home': '门户首页',
+    'activity_detail': '活动详情页',
+    'enrollment_success': '报名成功反馈页',
+    'agency_activity_list': '机构活动管理',
+    'admin_all_activities': '全量活动管理',
+    'enrollment_data_detail': '报名数据详情',
+    'user_account_management': '用户与执行机构管理',
+    'system_config_center': '系统配置中心',
+    'activity_advanced_editor': '活动高级内容编辑页',
+    'activity_past_archive_manager': '往期活动回顾发布页',
+    'page_2651559': '用户注册页面',
+    'page_2651560': '用户信息详情',
+    'page_2659759': '已上架活动列表'
+                }
+                const allPageIds = ["login","agency_dashboard","activity_proposal_form","admin_dashboard","activity_audit_list","activity_detail_view","home","activity_detail","enrollment_success","agency_activity_list","admin_all_activities","enrollment_data_detail","user_account_management","system_config_center","activity_advanced_editor","activity_past_archive_manager","page_2651559","page_2651560","page_2659759"]
+                const allFormatPageIdsMap = {"login":"login","agency_dashboard":"agency-dashboard","activity_proposal_form":"activity-proposal-form","admin_dashboard":"admin-dashboard","activity_audit_list":"activity-audit-list","activity_detail_view":"activity-detail-view","home":"home","activity_detail":"activity-detail","enrollment_success":"enrollment-success","agency_activity_list":"agency-activity-list","admin_all_activities":"admin-all-activities","enrollment_data_detail":"enrollment-data-detail","user_account_management":"user-account-management","system_config_center":"system-config-center","activity_advanced_editor":"activity-advanced-editor","activity_past_archive_manager":"activity-past-archive-manager","page_2651559":"page-2651559","page_2651560":"page-2651560","page_2659759":"page-2659759"}
+                const IFRAME_MESSAGE_TYPE = {
+                  iframeNavigation: 'iframeNavigation',
+                }
+                const safeAddEventListener = function Tc(e,t,r,n=!1){e.removeEventListener(t,r,n),e.addEventListener(t,r,n)}
+                const processOnclick = (e,t,r)=>{if(r){const n=Rw(t);if(n.methodName&&Lp(n.methodName,r))return;e.preventDefault(),e.stopPropagation();const s=n.args||[],i=(s==null?void 0:s.find(u=>u))||"";i&&Mp(i)}}
+                const checkIframeMethod = (e,t)=>{try{return typeof t[e]=="function"||typeof t[e]=="function"}catch(r){return!1}}
+                const postIframeMessage = (targetPageId) => {
+                  window.parent.postMessage({
+                    type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                    targetPageId,
+                  })
+                }
+                const handleIframeLinkClick = (event) => {
+                  const dynamicIframe = document.querySelector('#dynamicIframe')
+                  if (!dynamicIframe?.contentWindow) {
+                    return
+                  }
+                  const link = event.target.closest('a')
+                  const target = event.target
+                  if (link) {
+                    const href = link.getAttribute('href')
+                    const onclick = link.getAttribute('onclick')
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      const targetPageId = getKeyByValueObj(allFormatPageIdsMap, href)
+                      if (targetPageId) {
+                        postIframeMessage(targetPageId)
+                      }
+                      return
+                    }
+                    if (onclick) {
+                      processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                    } else {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }
+                    return
+                  }
+                  const onclick = target.getAttribute('onclick')
+                  if (onclick) {
+                    processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                  }
+                }
+                function stringExt(link) {
+                  let s = String(link || '')
+                  s = (s.split('#')[0] || '')
+                  s = (s.split('?')[0] || '')
+                  s = s.trim()
+                  s = s.split('/').filter(Boolean).pop() || ''
+                  const lower = s.toLowerCase()
+                  if (lower.endsWith('.html') || lower.endsWith('.php') || lower.endsWith('.aspx')) {
+                    s = s.slice(0, s.lastIndexOf('.'))
+                  }
+                  return s
+                }
+                function formatHref(href) {
+                  if (!href) {
+                    return ''
+                  }
+                  try {
+                    const url = new URL(href, window.location.href)
+                    const pathname = url.pathname || ''
+                    return stringExt(pathname)
+                  } catch {
+                    return stringExt(href)
+                  }
+                }
+                function getKeyByValueObj(obj, value) {
+                  const newValue = formatHref(value)
+                  const keyFind = Object.keys(obj).find(k => k === newValue)
+                  if (keyFind) {
+                    return keyFind
+                  }
+                  return Object.keys(obj).find(k => obj[k] === newValue)
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                function setupIframeEvents() {
+                  const iframe = document.getElementById('dynamicIframe')
+                  if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    safeAddEventListener(iframe.contentWindow.document, 'click', handleIframeLinkClick, true)
+                  } else {
+                    setTimeout(setupIframeEvents, 100)
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = function() {
+                  adjustIframeSize()
+                  setupIframeEvents()
+                }
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="18" data-source-line-end="43" lang="zh-CN"><head data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="19" data-source-line-end="24"><script>(function(){
+      function stringExt(link) {
+        let s = String(link || &#39;&#39;)
+        s = (s.split(&#39;#&#39;)[0] || &#39;&#39;)
+        s = (s.split(&#39;?&#39;)[0] || &#39;&#39;)
+        s = s.trim()
+        s = s.split(&#39;/&#39;).filter(Boolean).pop() || &#39;&#39;
+        const lower = s.toLowerCase()
+        if (lower.endsWith(&#39;.html&#39;) || lower.endsWith(&#39;.php&#39;) || lower.endsWith(&#39;.aspx&#39;)) {
+          s = s.slice(0, s.lastIndexOf(&#39;.&#39;))
+        }
+        return s
+      }
+      function formatHref(href) {
+        if (!href) {
+          return &#39;&#39;
+        }
+        try {
+          const url = new URL(href, window.location.href)
+          const pathname = url.pathname || &#39;&#39;
+          return stringExt(pathname)
+        } catch {
+          return stringExt(href)
+        }
+      }
+      function getKeyByValueObj(obj, value) {
+        const newValue = formatHref(value)
+        const keyFind = Object.keys(obj).find(k => k === newValue)
+        if (keyFind) {
+          return keyFind
+        }
+        return Object.keys(obj).find(k => obj[k] === newValue)
+      }
+      function emit(to, source){
+        try {
+          if (window.parent) {
+            const allFormatPageIdsMap = {"login":"login","agency_dashboard":"agency-dashboard","activity_proposal_form":"activity-proposal-form","admin_dashboard":"admin-dashboard","activity_audit_list":"activity-audit-list","activity_detail_view":"activity-detail-view","home":"home","activity_detail":"activity-detail","enrollment_success":"enrollment-success","agency_activity_list":"agency-activity-list","admin_all_activities":"admin-all-activities","enrollment_data_detail":"enrollment-data-detail","user_account_management":"user-account-management","system_config_center":"system-config-center","activity_advanced_editor":"activity-advanced-editor","activity_past_archive_manager":"activity-past-archive-manager","page_2651559":"page-2651559","page_2651560":"page-2651560","page_2659759":"page-2659759"}
+            const IFRAME_MESSAGE_TYPE = {
+              iframeNavigation: &#39;iframeNavigation&#39;,
+            }
+            const targetPageId = getKeyByValueObj(allFormatPageIdsMap, String(to || &#39;&#39;))
+            if (targetPageId) {
+              window.parent.postMessage({
+                type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                targetPageId,
+              }, &#39;*&#39;)
+            }
+          }
+        } catch(e) {}
+      }
+      try{
+        if (&#39;navigation&#39; in window &amp;&amp; window.navigation &amp;&amp; typeof window.navigation.addEventListener===&#39;function&#39;){
+          window.navigation.addEventListener(&#39;navigate&#39;, function(e){
+            try{
+              var url = (e.destination &amp;&amp; e.destination.url) || &#39;&#39;;
+              if (e.canIntercept &amp;&amp; typeof e.intercept===&#39;function&#39;){ e.intercept({ handler:function(){} }) }
+              else if (e.preventDefault){ e.preventDefault() }
+              emit(url)
+            }catch(_){}
+          })
+        }
+      }catch(_){}
+    })();</script><meta name="supported-color-schemes" content="light"><meta name="color-scheme" content="light"><style>
+      :root, html, body { color-scheme: light; }
+      html { forced-color-adjust: none; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Built with Astro">
+    <title data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="23" data-source-line-end="23">报名数据详情 - 微光公益</title>
+  <link rel="stylesheet" href="./assets/html/105936/activity-advanced-editor.IwUQJicz.css"><script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="25" data-source-line-end="42" class="min-h-screen bg-slate-50">
+    <div class="w-full min-h-screen bg-background flex flex-col font-sans">
+        
+  <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&amp;&amp;(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&amp;&amp;this.lastChild.nodeValue==="astro:end"&amp;&amp;(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&amp;&amp;await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="7MKOr" prefix="s0" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/CommonHeader.BAdA6dDe.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{&amp;quot;variant&amp;quot;:[0,&amp;quot;agency&amp;quot;],&amp;quot;userName&amp;quot;:[0,&amp;quot;执行机构&amp;quot;],&amp;quot;mode&amp;quot;:[0,&amp;quot;desktop&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;CommonHeader&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="49" data-source-line-end="117"><div class="px-6 lg:px-10" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="50" data-source-line-end="116"><div class="flex h-16 items-center justify-between" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="51" data-source-line-end="115"><div class="flex items-center space-x-6 lg:space-x-12" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="53" data-source-line-end="72"><a href="./home.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="54" data-source-line-end="62"><div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-background" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="55" data-source-line-end="57"><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/6c1ebe9f-386a-4af7-a485-1aa7f93a6fd2.png" alt="Logo" class="w-full h-full object-contain" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="56" data-source-line-end="56"></div><span class="text-xl font-bold tracking-tight" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="61" data-source-line-end="61">青岛微光慈善基金会</span></a><!----></div><div class="flex items-center space-x-4" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="75" data-source-line-end="114"><!--[--><!--[--><!--[--><!--[--><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground outline-none h-8 w-8 rounded-full p-0" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" id="reka-dropdown-menu-trigger-s0-0" type="button" aria-haspopup="menu" aria-expanded="false" data-state="closed"><!--[--><div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center" data-source-file="src/components/common/CommonHeader.vue" data-source-line-start="91" data-source-line-end="93"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary lucide-user-icon lucide-user text-primary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><!--]--></button><!--v-if--><!--]--><!--]--><!--]--><!--]--></div></div></div></header><!--astro:end--></astro-island>
+  
+  <main data-source-file="src/pages/enrollment-data-detail.astro" data-source-line-start="26" data-source-line-end="38" class="flex-1 bg-slate-50/50 min-h-screen">
+    <div class="border-b border-border bg-background" data-source-file="src/components/common/PageHeader.vue" data-source-line-start="28" data-source-line-end="53"><div class="container mx-auto px-4 py-6" data-source-file="src/components/common/PageHeader.vue" data-source-line-start="29" data-source-line-end="52"><nav aria-label="breadcrumb" class="mb-4" data-source-file="src/components/ui/breadcrumb/Breadcrumb.vue" data-source-line-start="10" data-source-line-end="12"><!--[--><ol class="flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5" data-source-file="src/components/ui/breadcrumb/BreadcrumbList.vue" data-source-line-start="11" data-source-line-end="15"><!--[--><!--[--><li class="inline-flex items-center gap-1.5" data-source-file="src/components/ui/breadcrumb/BreadcrumbItem.vue" data-source-line-start="11" data-source-line-end="15"><!--[--><a class="transition-colors hover:text-foreground" href="./agency-dashboard.html" data-source-file="src/components/ui/breadcrumb/BreadcrumbLink.vue" data-source-line-start="13" data-source-line-end="19"><!--[-->工作台<!--]--></a></li><li role="presentation" aria-hidden="true" class="[&amp;amp;&amp;gt;svg]:w-3.5 [&amp;amp;&amp;gt;svg]:h-3.5" data-source-file="src/components/ui/breadcrumb/BreadcrumbSeparator.vue" data-source-line-start="12" data-source-line-end="20"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/ui/breadcrumb/BreadcrumbSeparator.vue" data-source-line-start="18" data-source-line-end="18" class="lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"></path></svg><!--]--></li><!--]--><li class="inline-flex items-center gap-1.5" data-source-file="src/components/ui/breadcrumb/BreadcrumbItem.vue" data-source-line-start="11" data-source-line-end="15"><!--[--><a class="transition-colors hover:text-foreground" href="./agency-activity-list.html" data-source-file="src/components/ui/breadcrumb/BreadcrumbLink.vue" data-source-line-start="13" data-source-line-end="19"><!--[-->我的活动<!--]--></a></li><li role="presentation" aria-hidden="true" class="[&amp;amp;&amp;gt;svg]:w-3.5 [&amp;amp;&amp;gt;svg]:h-3.5" data-source-file="src/components/ui/breadcrumb/BreadcrumbSeparator.vue" data-source-line-start="12" data-source-line-end="20"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/ui/breadcrumb/BreadcrumbSeparator.vue" data-source-line-start="18" data-source-line-end="18" class="lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"></path></svg><!--]--></li><!--]--><li class="inline-flex items-center gap-1.5" data-source-file="src/components/ui/breadcrumb/BreadcrumbItem.vue" data-source-line-start="11" data-source-line-end="15"><!--[--><span role="link" aria-disabled="true" aria-current="page" class="font-normal text-foreground" data-source-file="src/components/ui/breadcrumb/BreadcrumbPage.vue" data-source-line-start="11" data-source-line-end="18"><!--[-->报名数据详情<!--]--></span><!----><!--]--></li><!--]--><!--]--></ol><!--]--></nav><div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4" data-source-file="src/components/common/PageHeader.vue" data-source-line-start="46" data-source-line-end="51"><h1 class="text-2xl lg:text-3xl font-bold" data-source-file="src/components/common/PageHeader.vue" data-source-line-start="47" data-source-line-end="47">青岛崂山"守护夕阳"老年人陪伴活动 - 报名数据</h1><div class="flex items-center gap-2" data-source-file="src/components/common/PageHeader.vue" data-source-line-start="48" data-source-line-end="50"><!--[--><!--]--></div></div></div></div>
+    
+    <astro-island uid="1d4wDl" prefix="s2" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/EnrollmentDataContent.Co7_6NPO.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/105936/client.CCTh0CRo.js" props="{&amp;quot;activityId&amp;quot;:[0,&amp;quot;act-001&amp;quot;],&amp;quot;activityTitle&amp;quot;:[0,&amp;quot;青岛崂山\&amp;quot;守护夕阳\&amp;quot;老年人陪伴活动&amp;quot;],&amp;quot;organization&amp;quot;:[0,&amp;quot;青岛市社会福利中心&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;EnrollmentDataContent&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><div class="container mx-auto px-4 py-8" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="148" data-source-line-end="333"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="150" data-source-line-end="200"><div class="rounded-lg border text-card-foreground bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6 pb-3" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><h3 class="tracking-tight text-sm font-medium text-muted-foreground" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[-->总报名人数<!--]--></h3><!--]--></div><div class="p-6 pt-0" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="text-2xl font-bold" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="156" data-source-line-end="156">2</div><p class="text-xs text-muted-foreground mt-1" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="157" data-source-line-end="157">参与人数：3</p><!--]--></div><!--]--></div><div class="rounded-lg border text-card-foreground bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6 pb-3" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><h3 class="tracking-tight text-sm font-medium text-muted-foreground" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[-->已确认<!--]--></h3><!--]--></div><div class="p-6 pt-0" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="text-2xl font-bold text-[hsl(142_71%_45%)]" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="166" data-source-line-end="166">1</div><p class="text-xs text-muted-foreground mt-1" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="167" data-source-line-end="167">已确认人数</p><!--]--></div><!--]--></div><div class="rounded-lg border text-card-foreground bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6 pb-3" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><h3 class="tracking-tight text-sm font-medium text-muted-foreground" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[-->待确认<!--]--></h3><!--]--></div><div class="p-6 pt-0" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="text-2xl font-bold text-primary" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="176" data-source-line-end="176">1</div><p class="text-xs text-muted-foreground mt-1" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="177" data-source-line-end="177">需处理申请</p><!--]--></div><!--]--></div><div class="rounded-lg border text-card-foreground bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6 pb-3" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><h3 class="tracking-tight text-sm font-medium text-muted-foreground" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[-->已取消<!--]--></h3><!--]--></div><div class="p-6 pt-0" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="text-2xl font-bold text-destructive" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="186" data-source-line-end="186">0</div><p class="text-xs text-muted-foreground mt-1" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="187" data-source-line-end="187">已关闭流程</p><!--]--></div><!--]--></div><div class="rounded-lg border text-card-foreground bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6 pb-3" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><h3 class="tracking-tight text-sm font-medium text-muted-foreground" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[-->执行机构<!--]--></h3><!--]--></div><div class="p-6 pt-0" data-source-file="src/components/ui/card/CardContent.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="text-sm font-semibold line-clamp-2" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="196" data-source-line-end="196">青岛市社会福利中心</div><p class="text-xs text-muted-foreground mt-1" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="197" data-source-line-end="197">活动执行方</p><!--]--></div><!--]--></div></div><div class="rounded-lg border text-card-foreground mb-6 bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="flex flex-col gap-y-1.5 p-6" data-source-file="src/components/ui/card/CardHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="205" data-source-line-end="236"><h3 class="font-semibold tracking-tight text-lg" data-source-file="src/components/ui/card/CardTitle.vue" data-source-line-start="11" data-source-line-end="17"><!--[-->报名名单<!--]--></h3><div class="flex flex-col md:flex-row gap-3" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="207" data-source-line-end="235"><input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:w-64" placeholder="搜索姓名、电话或报名编号..." disabled="" data-source-file="src/components/ui/input/Input.vue" data-source-line-start="23" data-source-line-end="23" value=""><!--[--><!--[--><!--[--><button class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&amp;amp;&amp;gt;span]:truncate text-start md:w-40" data-source-file="src/components/ui/select/SelectTrigger.vue" data-source-line-start="17" data-source-line-end="28" role="combobox" type="button" aria-controls="reka-select-content-s2-0" aria-expanded="false" aria-required="false" aria-autocomplete="none" disabled="" dir="ltr" data-state="closed" data-disabled=""><!--[--><!--[--><span style="pointer-events:none;" data-placeholder="筛选状态" data-source-file="src/components/ui/select/SelectValue.vue" data-source-line-start="9" data-source-line-end="11"><!--[-->筛选状态<!--]--></span><!--]--><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-source-file="src/components/ui/select/SelectTrigger.vue" data-source-line-start="26" data-source-line-end="26" class="lucide w-4 h-4 opacity-50 shrink-0 lucide-chevron-down-icon lucide-chevron-down w-4 h-4 opacity-50 shrink-0"><path d="m6 9 6 6 6-6"></path></svg><!--]--></button><!--v-if--><!--]--><!--]--><select aria-hidden="true" tabindex="-1" style="position:absolute;border:0;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);clip-path:inset(50%);white-space:nowrap;word-wrap:normal;top:-1px;left:-1px;" value="all" disabled=""><!--[--><!--]--></select><!--]--><button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2" disabled="" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg><span class="hidden md:inline" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="232" data-source-line-end="232">导出Excel</span><span class="md:hidden" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="233" data-source-line-end="233">导出</span><!--]--></button></div></div><!--]--></div><!--]--></div><div class="rounded-lg border text-card-foreground overflow-hidden bg-white shadow-sm border-none" data-source-file="src/components/ui/card/Card.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="overflow-x-auto" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="242" data-source-line-end="287"><div class="relative w-full overflow-auto" data-source-file="src/components/ui/table/Table.vue" data-source-line-start="11" data-source-line-end="15"><table class="w-full caption-bottom text-sm" data-source-file="src/components/ui/table/Table.vue" data-source-line-start="12" data-source-line-end="14"><!--[--><thead class="[&amp;amp;_tr]:border-b" data-source-file="src/components/ui/table/TableHeader.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted" data-source-file="src/components/ui/table/TableRow.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->报名编号<!--]--></th><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->姓名<!--]--></th><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->电话<!--]--></th><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0 hidden md:table-cell" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->身份证号<!--]--></th><th class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0 text-center" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->参与人数<!--]--></th><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0 hidden lg:table-cell" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->报名时间<!--]--></th><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->状态<!--]--></th><th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;amp;:has([role=checkbox])]:pr-0 hidden md:table-cell" data-source-file="src/components/ui/table/TableHead.vue" data-source-line-start="11" data-source-line-end="13"><!--[-->备注<!--]--></th><!--]--></tr><!--]--></thead><tbody class="[&amp;amp;_tr:last-child]:border-0" data-source-file="src/components/ui/table/TableBody.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><!--[--><tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted" data-source-file="src/components/ui/table/TableRow.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 font-mono text-sm whitespace-nowrap" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->BM-20260312-001<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 font-medium whitespace-nowrap" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->张三<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 whitespace-nowrap" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->13511112222<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 hidden md:table-cell text-sm text-muted-foreground" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->37021119900101****<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 text-center" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->1<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 hidden lg:table-cell text-sm text-muted-foreground" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->2026-03-12 10:30:00<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="inline-flex gap-1 items-center rounded-full border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-success/10 text-[hsl(142_71%_45%)] hover:bg-success/20 text-xs px-2 py-0.5" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->已上架<!--]--></div><!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 hidden md:table-cell text-sm text-muted-foreground" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->-<!--]--></td><!--]--></tr><tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted" data-source-file="src/components/ui/table/TableRow.vue" data-source-line-start="11" data-source-line-end="13"><!--[--><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 font-mono text-sm whitespace-nowrap" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->BM-20260312-002<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 font-medium whitespace-nowrap" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->李小美<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 whitespace-nowrap" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->18677778888<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 hidden md:table-cell text-sm text-muted-foreground" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->-<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 text-center" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->2<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 hidden lg:table-cell text-sm text-muted-foreground" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->2026-03-12 11:15:00<!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[--><div class="inline-flex gap-1 items-center rounded-full border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-primary/10 text-primary hover:bg-primary/20 text-xs px-2 py-0.5" data-source-file="src/components/ui/badge/Badge.vue" data-source-line-start="14" data-source-line-end="16"><!--[-->待审核<!--]--></div><!--]--></td><td class="p-4 align-middle [&amp;amp;:has([role=checkbox])]:pr-0 hidden md:table-cell text-sm text-muted-foreground" data-source-file="src/components/ui/table/TableCell.vue" data-source-line-start="11" data-source-line-end="20"><!--[-->-<!--]--></td><!--]--></tr><!--]--><!--]--></tbody><!--]--></table></div></div><!----><!--]--></div><div class="mt-8 flex justify-center" data-source-file="src/components/enrollment-data-detail/EnrollmentDataContent.vue" data-source-line-start="327" data-source-line-end="332"><a class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2" href="./agency-activity-list.html" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg> 返回活动列表 <!--]--></a></div></div><!--astro:end--></astro-island>
+  </main>
+
+      </div>
+  <script>
+    const originalBack = window.history.back
+    const originalForward = window.history.forward
+    const originalGo = window.history.go
+    function isValidNavigation(){
+      if(!window.parent.history.state.back || !window.parent.history.state.back.startsWith(&#39;/designPage&#39;)){
+        return false
+      }
+      return true
+    }
+    window.history.back = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalBack.apply(this, args);
+    };
+
+    window.history.forward = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalForward.apply(this, args);
+    };
+
+    window.history.go = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalGo.apply(this, args);
+    };
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            
