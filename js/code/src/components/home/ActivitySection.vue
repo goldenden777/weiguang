@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import ActivityCard from '@/components/common/ActivityCard.vue'
+
+defineOptions({ name: 'ActivitySection' })
 import EmptyState from '@/components/common/EmptyState.vue'
 import type { ActivityModel } from '@/data/activity'
 import { ACTIVITY_CATEGORIES } from '@/data/activity'
@@ -152,7 +154,7 @@ const toActivityCard = (activity: ActivityModel) => {
     category: getCategoryName(activity.category),
     status,
     organization: activity.agencyName,
-    imageUrl: activity.coverImage,
+    imageUrl: activity.coverImage ?? '',
   }
 }
 

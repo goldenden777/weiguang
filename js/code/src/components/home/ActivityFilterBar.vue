@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
+
+defineOptions({ name: 'ActivityFilterBar' })
 import {
   Select,
   SelectContent,

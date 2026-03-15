@@ -6,13 +6,23 @@ function getRelativePath(filePath: string): string {
   return filePath.replace(/^.*\/src\//, 'src/');
 }
 
+const SKIP_TAGS_FOR_SOURCE_ATTR = [
+  'DropdownMenuContent', 'DropdownMenuPortal', 'MenuPortal', 'MenuContent',
+  'DialogContent', 'PopoverContent', 'SelectContent', 'TooltipContent',
+];
+function shouldSkipSourceAttr(tag: string): boolean {
+  if (!tag || typeof tag !== 'string') return true;
+  if (tag.includes('Portal')) return true;
+  return SKIP_TAGS_FOR_SOURCE_ATTR.some((t) => tag === t);
+}
+
 export function vueNodeTransform() {
   return (node: any, ctx: any) => {
     if (node && node.type === 1 && node.tag) {
       const filePath = ctx?.filename || '';
       const relativeFile = getRelativePath(filePath);
-      // 不向 Dialog 内容根注入，避免属性落到 Teleport 上触发 Vue 警告
       if (relativeFile.includes('dialog/DialogContent.vue')) return;
+      if (shouldSkipSourceAttr(node.tag)) return;
 
       const hasSourceAttr = node.props.some(
         (prop: any) => prop.type === 6 && prop.name === 'data-source-file'

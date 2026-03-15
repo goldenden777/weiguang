@@ -95,9 +95,14 @@ server {
 
 ### 方式 D：Vercel 部署（避免 NOT_FOUND / 404）
 
-1. 在 Vercel 项目设置中，将 **Root Directory** 设为 **`js/code`**（不要用仓库根目录），这样构建和输出都会在正确目录。
-2. 本仓库已在 `js/code` 下提供 **`vercel.json`**，其中 `"cleanUrls": true` 会让 Vercel 把无后缀路径映射到对应 `.html`（例如访问 `/page-2659759` 会返回 `page-2659759.html`），避免出现 NOT_FOUND。
-3. 部署后用 `https://你的域名/page-2659759` 或 `https://你的域名/home` 访问即可；若仍 404，请检查 Root Directory 是否为 `js/code` 且构建成功生成了 `dist`。
+1. **必须**在 Vercel 项目设置中，将 **Root Directory** 设为 **`js/code`**（不要用仓库根目录）。否则 Vercel 会在仓库根目录找 `package.json` 和构建产物，导致构建失败或 NOT_FOUND。
+2. 本仓库在 `js/code` 下提供 **`vercel.json`**：
+   - `cleanUrls: true`：访问 `/page-2659759` 会映射到 `page-2659759.html`，避免 404。
+   - `outputDirectory: "dist"`：明确指定静态文件来自 Astro 的 `dist` 目录。
+   - `buildCommand: "npm run build"`：在 Root Directory 下执行构建。
+3. **静态部署且无后端时**：在 Vercel 的 **Environment Variables** 中增加 `VITE_USE_MOCK=true`（或本地在 `js/code` 下复制 `.env.example` 为 `.env` 并设置该变量），这样首页不会请求 `/api/content/news`、`/api/content/banners`，避免控制台出现 404。
+4. 部署后用 `https://你的域名/page-2659759` 或 `https://你的域名/home` 访问即可。
+5. **若仍出现 NOT_FOUND**：在 Vercel 项目 → Settings → General 中确认 **Root Directory** 为 `js/code`；在 Deployments 中查看该次部署的 Build Logs，确认 `dist` 已生成且含 `.html` 文件。
 
 ---
 
@@ -121,7 +126,7 @@ CMD ["serve", "-s", "/app", "-l", "3000"]
 ## 四、重要说明
 
 1. **当前为纯前端静态站点**  
-   登录、活动/报名等数据来自前端 Mock。对接真实后端时，需修改 `src/services/` 下对应接口为真实 API 地址（可配合环境变量区分开发/生产）。
+   登录、活动/报名等数据来自前端 Mock。对接真实后端时，需修改 `src/services/` 下对应接口为真实 API 地址（可配合环境变量区分开发/生产）。**无后端静态部署时**建议设置环境变量 `VITE_USE_MOCK=true`，避免请求 `/api/content/*` 产生 404（参见 `js/code/.env.example`）。
 
 2. **链接与路径**  
    站内链接均为相对路径（如 `./home.html`、`./login.html`），可部署在任意域名或子路径；若部署在子路径（如 `/activity/`），需在构建或 Nginx 中做 base 配置，或使用与当前相同的相对路径。
@@ -142,3 +147,19 @@ CMD ["serve", "-s", "/app", "-l", "3000"]
 - [ ] 浏览器访问 `http://你的域名或IP/home.html` 能正常打开门户首页
 
 完成以上步骤即可在云端正常使用本系统。
+
+---
+
+## 六、Vercel NOT_FOUND (404) 专项排查
+
+若在 Vercel 上访问页面出现 **NOT_FOUND**（HTTP 404），按下面顺序检查：
+
+| 检查项 | 说明 |
+|--------|------|
+| **Root Directory** | 必须在 Vercel 项目 **Settings → General → Root Directory** 中填写 `js/code`。若留空或填错，构建和输出目录都不对，所有路径都会 404。 |
+| **构建是否成功** | 在 **Deployments → 某次部署 → Building** 中查看日志，确认 `npm run build` 成功且生成了 `dist` 目录。 |
+| **dist 内容** | 构建完成后，`dist` 下应有 `home.html`、`page-2659759.html` 等文件。若没有，说明 Astro 构建或 Root Directory 有误。 |
+| **访问路径** | 使用「无后缀」路径：`/home`、`/page-2659759`。带 `.html` 的路径（如 `/home.html`）会被 cleanUrls 重定向到无后缀，一般也能访问。 |
+| **vercel.json 位置** | `vercel.json` 必须在 **Root Directory 所指目录**（即 `js/code`）下，这样 `outputDirectory` 和 `cleanUrls` 才会生效。 |
+
+根因通常是：**Root Directory 未设为 `js/code`**，导致 Vercel 在仓库根目录构建（没有 `package.json`）或从错误目录读取静态文件，从而返回 NOT_FOUND。

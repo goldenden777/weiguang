@@ -4,6 +4,8 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent } from '
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
+defineOptions({ name: 'EmptyState' })
+
 interface Props {
   type?: 'no-activities' | 'no-enrollments' | 'no-tasks' | 'no-results' | 'activity-not-found'
   actionText?: string

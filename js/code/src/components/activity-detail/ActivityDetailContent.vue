@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { MOCK_ACTIVITIES } from '@/data/activity'
+
+defineOptions({ name: 'ActivityDetailContent' })
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
@@ -114,11 +116,13 @@ const sections = [
         <div>
           <p class="text-sm text-muted-foreground mb-1">联系电话</p>
           <a 
+            v-if="activity.contactPhone"
             :href="`tel:${activity.contactPhone}`"
             class="font-semibold text-primary hover:underline"
           >
             {{ activity.contactPhone }}
           </a>
+          <span v-else class="font-semibold text-muted-foreground">{{ activity.contactPhone || '—' }}</span>
         </div>
       </CardContent>
     </Card>

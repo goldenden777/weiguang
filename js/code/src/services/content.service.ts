@@ -20,6 +20,15 @@ const API_BASE = typeof import.meta !== 'undefined' && (import.meta as any).env?
   ? String((import.meta as any).env.VITE_API_BASE)
   : '/api'
 
+/** 为 true 时直接使用 Mock，不请求 /api，避免静态部署或开发时出现 404。开发环境默认 true（可设 VITE_USE_MOCK=false 测真实 API） */
+const USE_MOCK = (() => {
+  if (typeof import.meta === 'undefined') return false
+  const env = (import.meta as any).env
+  if (env?.VITE_USE_MOCK === 'false') return false
+  if (env?.VITE_USE_MOCK === 'true') return true
+  return env?.MODE === 'development'
+})()
+
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {}
   const token = sessionStorage.getItem('token') ?? sessionStorage.getItem('authToken')
@@ -53,12 +62,14 @@ async function request<T>(
 // ---------- Banner ----------
 
 export async function getBanners(): Promise<BannerModel[]> {
+  if (USE_MOCK) return [...MOCK_BANNERS]
   const { ok, data } = await request<BannerModel[]>('GET', '/content/banners')
   if (ok && Array.isArray(data)) return data
   return [...MOCK_BANNERS]
 }
 
 export async function getBannerById(id: string): Promise<BannerModel | null> {
+  if (USE_MOCK) return MOCK_BANNERS.find((b) => b.id === id) ?? null
   const { ok, data } = await request<BannerModel>('GET', `/content/banners/${encodeURIComponent(id)}`)
   if (ok && data) return data
   return MOCK_BANNERS.find((b) => b.id === id) ?? null
@@ -99,6 +110,14 @@ export interface NewsListResult {
 export async function getNewsList(params?: NewsListParams): Promise<NewsListResult> {
   const page = params?.page ?? 1
   const pageSize = params?.pageSize ?? 10
+  if (USE_MOCK) {
+    const list = [...MOCK_NEWS]
+    const start = (page - 1) * pageSize
+    return {
+      list: list.slice(start, start + pageSize),
+      total: list.length,
+    }
+  }
   const q = new URLSearchParams()
   q.set('page', String(page))
   q.set('pageSize', String(pageSize))
@@ -115,6 +134,7 @@ export async function getNewsList(params?: NewsListParams): Promise<NewsListResu
 }
 
 export async function getNewsById(id: string): Promise<NewsModel | null> {
+  if (USE_MOCK) return MOCK_NEWS.find((n) => n.id === id) ?? null
   const { ok, data } = await request<NewsModel>('GET', `/content/news/${encodeURIComponent(id)}`)
   if (ok && data) return data
   return MOCK_NEWS.find((n) => n.id === id) ?? null
@@ -141,6 +161,7 @@ export async function deleteNews(id: string): Promise<boolean> {
 // ---------- Footer ----------
 
 export async function getFooterConfig(): Promise<FooterConfig> {
+  if (USE_MOCK) return { ...MOCK_FOOTER_CONFIG }
   const { ok, data } = await request<FooterConfig>('GET', '/content/footer')
   if (ok && data) return data
   return { ...MOCK_FOOTER_CONFIG }
@@ -154,6 +175,7 @@ export async function saveFooterConfig(payload: FooterConfig): Promise<boolean> 
 // ---------- Site Basic ----------
 
 export async function getSiteBasicConfig(): Promise<SiteBasicConfig> {
+  if (USE_MOCK) return { ...MOCK_SITE_BASIC }
   const { ok, data } = await request<SiteBasicConfig>('GET', '/content/site-basic')
   if (ok && data) return data
   return { ...MOCK_SITE_BASIC }

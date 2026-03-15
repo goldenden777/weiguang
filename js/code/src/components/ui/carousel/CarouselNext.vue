@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from '@/components/ui/button'
 import { useCarousel } from "./useCarousel"
 
+defineOptions({ name: 'CarouselNext' })
 const props = defineProps<WithClassAsProps>()
 
 const { orientation, canScrollNext, scrollNext } = useCarousel()

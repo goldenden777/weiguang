@@ -1,4 +1,6 @@
 ---
+import '../styles/global.css';
+
 interface Props {
   title?: string;
   description?: string;
@@ -39,9 +41,8 @@ const isMobile = mode === 'mobile';
         <slot />
       </div>
     )}
+    <script is:inline define:vars={{ isDev: import.meta.env.DEV }}>
+      (function(){ if (typeof window === 'undefined' || !isDev) return; if (window.location.protocol === 'file:') { const el = document.createElement('div'); el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#f59e0b;color:#000;padding:8px;text-align:center;z-index:99999;font-size:12px;'; el.textContent = '请使用 npm run dev 后通过 http://localhost:4321 访问本页，否则脚本与样式可能无法加载。'; document.body.prepend(el); } })();
+    </script>
   </body>
 </html>
-
-<style is:global>
-  @import '../styles/global.css';
-</style>

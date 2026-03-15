@@ -36,7 +36,11 @@ npm install
 npm run dev
 ```
 
-启动后访问控制台给出的地址（通常为 `http://localhost:4321`）。修改代码会热更新。
+启动后**必须**在浏览器中访问终端里显示的地址（如 `http://localhost:4321`），再点击进入首页等页面。
+
+- 不要用「打开文件」方式直接打开 `dist/home.html`（`file://`），否则会出现 `GET http://vite/client`、`http://src/styles/global.css` 等 ERR_NAME_NOT_RESOLVED。
+- 若使用代理或 hosts 将域名指向本机，请用 **`http://localhost:4321`** 访问开发环境，不要用其他域名（如 `http://vite/`），否则脚本/样式路径会解析错误。
+- 修改代码会热更新。
 
 ### 构建
 
@@ -53,6 +57,36 @@ npm run preview
 ```
 
 用于在本地验证 `dist/` 的访问效果。
+
+### 代码检查（ESLint）
+
+项目已配置 **ESLint**（Astro + Vue + TypeScript），用于自动检查语法与常见缺陷（未使用变量、错误用法等）。首次使用前请先安装依赖（见上文）。
+
+```bash
+# 检查整个项目，报错会列出文件和行号
+npm run lint
+
+# 自动修复可修复的问题（如部分格式、未使用变量）
+npm run lint:fix
+```
+
+在 VS Code / Cursor 中可安装 **ESLint** 扩展（`dbaeumer.vscode-eslint`），并开启「保存时自动修复」，即可在编辑时看到红线并自动修复部分问题。
+
+---
+
+## 常见问题（控制台报错）
+
+- **GET http://localhost:4321/undefined 404**  
+  已通过防护避免：首页轮播、活动卡片、新闻等处的图片/链接在数据为 `undefined` 或字符串 `"undefined"` 时会使用默认图或 `#`，不再发起 `/undefined` 请求。若仍出现，请检查是否有其他组件直接使用未校验的 `:src` / `:href`。
+
+- **GET http://vite/client、http://src/styles/global.css、http://fs/... net::ERR_NAME_NOT_RESOLVED**  
+  通常是因为用 **文件协议**（`file://`）打开了构建后的 `dist/*.html`，或通过非 dev 的域名访问。请务必使用 **`npm run dev`** 后通过终端显示的地址（如 `http://localhost:4321`）访问，不要直接双击打开 `home.html` 等文件。
+
+- **Vue: Feature flags __VUE_OPTIONS_API__ ... are not explicitly defined**  
+  项目已在 `astro.config.mjs` 的 `vite.define` 中注入这些标志。若在开发环境下仍看到该提示，多为 Vue esm-bundler 在 dev 时的已知表现，不影响功能。
+
+- **Vue warn: Skipping lazy hydration for component 'undefined'**  
+  已为首页用到的轮播等组件设置 `defineOptions({ name: '...' })`，以减少该警告。若在其他页面出现，可为对应 Vue 组件补充 `name`。
 
 ---
 

@@ -3,6 +3,8 @@
 import { ref, onMounted } from 'vue'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
+defineOptions({ name: 'MobileTabBar' })
+
 interface TabItem {
   label: string
   icon: string

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+
+defineOptions({ name: 'ActivityDetailContainer' })
 import type { ActivityModel } from '@/data/activity'
 import { getActivityById } from '@/services/activity.service'
 import ActivityDetailHero from '@/components/activity-detail/ActivityDetailHero.vue'

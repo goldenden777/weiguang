@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+
+defineOptions({ name: 'HomeHero' })
 import { Button } from '@/components/ui/button'
 import {
   Carousel,
@@ -25,6 +27,7 @@ const effectiveBanners = computed(() => {
 const hasBanners = computed(() => effectiveBanners.value.length > 0)
 const defaultTitle = '点亮微光，传递希望'
 const defaultSubtitle = '发现身边的公益活动，用行动温暖这座城市。'
+const defaultBannerImage = 'https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/356179cb-468f-4921-8105-fda73edb3c76.png'
 
 onMounted(async () => {
   isClient.value = false
@@ -46,6 +49,16 @@ const scrollToActivities = () => {
 function isExploreLink(b: BannerModel) {
   return !b.linkUrl || b.linkUrl === '#' || b.linkUrl === './home.html' || b.linkUrl === ''
 }
+
+function safeHref(url: string | undefined): string {
+  if (url == null || url === '' || String(url) === 'undefined') return '#'
+  return url
+}
+
+function safeImageUrl(url: string | undefined): string {
+  if (url == null || url === '' || String(url) === 'undefined') return defaultBannerImage
+  return url
+}
 </script>
 
 <template>
@@ -56,7 +69,7 @@ function isExploreLink(b: BannerModel) {
         <CarouselItem v-for="b in effectiveBanners" :key="b.id" class="pl-0">
           <div
             class="relative flex min-h-[280px] w-full bg-cover bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url(${b.imageUrl})` }"
+            :style="{ backgroundImage: `url(${safeImageUrl(b.imageUrl)})` }"
           >
             <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 to-slate-900/40 z-0" />
             <div class="relative z-10 flex w-full flex-col justify-center px-6">
@@ -77,15 +90,13 @@ function isExploreLink(b: BannerModel) {
                 >
                   {{ b.buttonText || '立即探索' }}
                 </Button>
-                <Button
+                <a
                   v-else
-                  size="sm"
-                  class="h-9 rounded-full px-4 text-xs font-semibold"
-                  as="a"
-                  :href="b.linkUrl"
+                  :href="safeHref(b.linkUrl)"
+                  class="inline-flex h-9 items-center justify-center rounded-full px-4 text-xs font-semibold bg-primary text-primary-foreground shadow hover:bg-primary/90"
                 >
                   {{ b.buttonText || '立即探索' }}
-                </Button>
+                </a>
               </div>
             </div>
           </div>

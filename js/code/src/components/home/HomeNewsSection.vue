@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+defineOptions({ name: 'HomeNewsSection' })
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 import { getNewsList } from '@/services/content.service'
@@ -101,7 +103,7 @@ onMounted(() => load())
             <div class="h-20 w-20 overflow-hidden rounded bg-muted sm:h-24 sm:w-24">
               <img
                 v-if="item.coverImage"
-                :src="item.coverImage"
+                :src="item.coverImage || ''"
                 :alt="item.title"
                 class="h-full w-full object-cover transition-transform group-hover:scale-105"
               />

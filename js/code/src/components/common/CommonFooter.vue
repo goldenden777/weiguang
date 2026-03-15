@@ -3,6 +3,8 @@
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
+defineOptions({ name: 'CommonFooter' })
+
 interface Props {
   variant?: 'simple' | 'full'
   layout?: 'mobile' | 'desktop'

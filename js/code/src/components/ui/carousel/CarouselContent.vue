@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { useCarousel } from "./useCarousel"
 
 defineOptions({
+  name: 'CarouselContent',
   inheritAttrs: false,
 })
 

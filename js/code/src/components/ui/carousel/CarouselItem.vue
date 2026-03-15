@@ -3,6 +3,7 @@ import type { WithClassAsProps } from "./interface"
 import { cn } from "@/lib/utils"
 import { useCarousel } from "./useCarousel"
 
+defineOptions({ name: 'CarouselItem' })
 const props = defineProps<WithClassAsProps>()
 
 const { orientation } = useCarousel()

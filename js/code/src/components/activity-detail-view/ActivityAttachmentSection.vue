@@ -97,10 +97,14 @@ const handleDownload = (attachment: Attachment) => {
             class="relative aspect-video rounded-xl overflow-hidden bg-muted group cursor-pointer border border-border shadow-sm"
           >
             <img
+              v-if="image.url"
               :src="image.url"
               :alt="image.id"
               class="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
             />
+            <div v-else class="w-full h-full flex items-center justify-center bg-muted">
+              <SafeIcon name="Image" :size="32" class="text-muted-foreground" />
+            </div>
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
               <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                 <SafeIcon name="Maximize2" :size="20" class="text-white" />

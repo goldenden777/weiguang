@@ -127,10 +127,14 @@ const handleBack = () => {
         <!-- Cover Image -->
         <div class="relative aspect-[21/9] rounded-xl overflow-hidden bg-muted border border-border group">
           <img
+            v-if="mockActivity.coverImage"
             :src="mockActivity.coverImage"
             :alt="mockActivity.title"
             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
+          <div v-else class="w-full h-full flex items-center justify-center bg-muted">
+            <SafeIcon name="Image" :size="48" class="text-muted-foreground" />
+          </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         </div>
 

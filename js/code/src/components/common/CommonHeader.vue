@@ -1,6 +1,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+defineOptions({ name: 'CommonHeader' })
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -65,7 +67,7 @@ const handleLogout = () => {
         <div class="flex items-center space-x-6 lg:space-x-12">
 <a href="./home.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div v-if="SITE_CONFIG?.logoUrl" class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-background">
-              <img v-if="SITE_CONFIG.logoUrl" :src="SITE_CONFIG.logoUrl" alt="Logo" class="w-full h-full object-contain" />
+              <img v-if="SITE_CONFIG?.logoUrl" :src="SITE_CONFIG?.logoUrl || ''" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <div v-else class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
               <SafeIcon name="Heart" :size="20" color="white" :stroke-width="2.5" />

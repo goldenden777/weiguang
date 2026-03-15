@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { MOCK_ACTIVITIES } from '@/data/activity'
+
+defineOptions({ name: 'ActivityDetailHero' })
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
@@ -48,6 +50,12 @@ const categoryMap: Record<string, string> = {
   'medical': '医疗卫生'
 }
 
+const safeCoverImage = computed(() => {
+  const url = activity.value?.coverImage
+  if (url == null || url === '' || String(url) === 'undefined') return ''
+  return String(url)
+})
+
 onMounted(() => {
   isClient.value = false
   if (typeof window !== 'undefined' && !props.activityId) {
@@ -66,8 +74,8 @@ onMounted(() => {
     <!-- Cover Image（无封面时不请求 undefined） -->
     <div class="relative aspect-video rounded-lg overflow-hidden bg-muted shadow-card">
       <img
-        v-if="activity.coverImage"
-        :src="activity.coverImage ?? ''"
+        v-if="safeCoverImage"
+        :src="safeCoverImage"
         :alt="activity.title"
         class="w-full h-full object-cover"
       />

@@ -2,6 +2,8 @@
 import { computed, defineAsyncComponent, h } from 'vue';
 import { Circle } from 'lucide-vue-next';
 
+defineOptions({ name: 'SafeIcon' });
+
 interface Props {
   name: string;
   size?: number | string;

@@ -9,14 +9,14 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 
-interface BreadcrumbItem {
+interface BreadcrumbEntry {
   label: string
   href?: string
 }
 
 interface Props {
   title: string
-  breadcrumbs?: BreadcrumbItem[]
+  breadcrumbs?: BreadcrumbEntry[]
 }
 
 withDefaults(defineProps<Props>(), {

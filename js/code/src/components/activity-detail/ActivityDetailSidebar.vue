@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { MOCK_ACTIVITIES } from '@/data/activity'
+
+defineOptions({ name: 'ActivityDetailSidebar' })
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

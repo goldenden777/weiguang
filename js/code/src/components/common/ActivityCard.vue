@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+
+defineOptions({ name: 'ActivityCard' })
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon.vue'
@@ -65,7 +67,7 @@ const statusConfig = {
       <div class="relative aspect-video bg-muted">
         <img
           v-if="activity.imageUrl"
-          :src="activity.imageUrl"
+          :src="activity.imageUrl || ''"
           :alt="activity.title"
           class="w-full h-full object-cover"
         />
@@ -129,7 +131,7 @@ const statusConfig = {
         <div class="h-24 w-24 flex-shrink-0 rounded-l-xl overflow-hidden bg-muted">
           <img
             v-if="activity.imageUrl"
-            :src="activity.imageUrl"
+            :src="activity.imageUrl || ''"
             :alt="activity.title"
             class="h-full w-full object-cover"
           />
@@ -173,7 +175,7 @@ const statusConfig = {
         <div class="md:w-48 aspect-video md:aspect-square bg-muted flex-shrink-0">
           <img
             v-if="activity.imageUrl"
-            :src="activity.imageUrl"
+            :src="activity.imageUrl || ''"
             :alt="activity.title"
             class="w-full h-full object-cover"
           />
