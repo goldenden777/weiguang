@@ -1,0 +1,38 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="工作台 - 跳转中" mode="desktop">
+  <main class="min-h-screen flex items-center justify-center bg-muted/30">
+    <div class="text-center space-y-3">
+      <div class="text-lg font-semibold text-foreground">正在进入工作台…</div>
+      <div class="text-sm text-muted-foreground">如未自动跳转，请返回后重试。</div>
+    </div>
+  </main>
+
+  <script is:inline>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem('currentUser');
+        if (!raw) {
+          window.location.href = './login.html?redirect=' + encodeURIComponent(window.location.href);
+          return;
+        }
+        var u = JSON.parse(raw) || {};
+        if (u.role === 'admin') {
+          window.location.href = './admin-dashboard.html';
+          return;
+        }
+        if (u.role === 'agency') {
+          window.location.href = './agency-dashboard.html';
+          return;
+        }
+        sessionStorage.removeItem('currentUser');
+        window.location.href = './login.html?redirect=' + encodeURIComponent(window.location.href);
+      } catch (e) {
+        window.location.href = './login.html?redirect=' + encodeURIComponent(window.location.href);
+      }
+    })();
+  </script>
+</BaseLayout>
+

@@ -1,12 +1,12 @@
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { SITE_CONFIG } from '@/data/config'
+import { SITE_CONFIG, updateSiteConfig } from '@/data/config'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
 interface Props {
@@ -33,6 +33,23 @@ onMounted(() => {
   // Initialize logo preview
   logoPreview.value = formData.value.logoUrl
 })
+
+// 同步到全局站点配置（以便全站 logo / 名称实时生效），并持久化到 localStorage
+watch(
+  formData,
+  (v) => {
+    updateSiteConfig({
+      siteName: v.siteName,
+      logoUrl: v.logoUrl,
+      contactPhone: v.contactPhone,
+      contactEmail: v.contactEmail,
+      contactAddress: v.contactAddress,
+      disclaimer: v.disclaimer,
+      successMessage: v.successMessage,
+    })
+  },
+  { deep: true }
+)
 
 const handleLogoChange = (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -168,8 +185,14 @@ formData.value = {
               </div>
               <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">
-                  当前路径：<span class="font-mono bg-muted px-1 py-0.5 rounded break-all">{{ formData.logoUrl || '未设置' }}</span>
+                  已选择 Logo。保存后将应用到全站页眉/侧边栏。
                 </p>
+                <details v-if="formData.logoUrl" class="text-xs text-muted-foreground">
+                  <summary class="cursor-pointer select-none hover:text-foreground">查看原始链接（base64/URL）</summary>
+                  <div class="mt-2 font-mono bg-muted px-2 py-1 rounded break-all">
+                    {{ formData.logoUrl }}
+                  </div>
+                </details>
                 <p class="text-[10px] text-muted-foreground opacity-70">
                   支持格式：JPEG, PNG。最大限制：2MB。
                 </p>

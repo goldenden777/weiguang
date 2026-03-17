@@ -253,8 +253,9 @@ const closeManually = () => {
               <FormControl>
                 <Checkbox
                   :checked="!!values.agreeDisclaimer"
-                  class="cursor-pointer shrink-0 mt-0.5"
+                  class="cursor-pointer shrink-0 mt-0.5 h-5 w-5 rounded-full"
                   @update:checked="onDisclaimerChecked"
+                  @click.stop="toggleDisclaimer"
                 />
               </FormControl>
               <div
