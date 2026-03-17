@@ -24,7 +24,8 @@ const STORAGE_KEY = 'wg:site-config:v1'
 
 const DEFAULT_SITE_CONFIG: SiteConfig = {
   siteName: "青岛微光慈善基金会",
-  logoUrl: "https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2026/3/13/6c1ebe9f-386a-4af7-a485-1aa7f93a6fd2.png",
+  // Logo 改为固定静态资源（放在 js/code/public/logo.png）
+  logoUrl: "/logo.png",
   contactPhone: "0532-88888888",
   contactEmail: "contact@weiguang.org",
   contactAddress: "山东省青岛市崂山区海尔路1号",
@@ -56,14 +57,17 @@ function loadPersisted(): Partial<SiteConfig> | null {
   }
 }
 
-function persist(config: SiteConfig) {
-  if (!isClient()) return
+function persist(config: SiteConfig): boolean {
+  if (!isClient()) return false
   try {
     // reactive 对象直接 JSON.stringify 可能被序列化为空对象；先 toRaw 再拷贝保证可序列化
     const raw = toRaw(config) as SiteConfig
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...raw }))
+    // 立刻读回做一次校验，避免“写失败但被吞掉”
+    const back = localStorage.getItem(STORAGE_KEY)
+    return !!back
   } catch {
-    // ignore
+    return false
   }
 }
 
@@ -74,6 +78,8 @@ function mergeWithDefault(persisted: Partial<SiteConfig> | null): SiteConfig {
   return {
     ...base,
     ...persisted,
+    // logo 写死，不允许被持久化配置覆盖
+    logoUrl: base.logoUrl,
     enrollmentFields: Array.isArray((persisted as any).enrollmentFields)
       ? ((persisted as any).enrollmentFields as FormFieldConfig[])
       : base.enrollmentFields,
@@ -83,13 +89,13 @@ function mergeWithDefault(persisted: Partial<SiteConfig> | null): SiteConfig {
 export const SITE_CONFIG: SiteConfig = reactive(mergeWithDefault(loadPersisted())) as SiteConfig
 
 /** 更新并持久化站点配置（用于系统配置中心） */
-export function updateSiteConfig(patch: Partial<SiteConfig>) {
+export function updateSiteConfig(patch: Partial<SiteConfig>): boolean {
   Object.assign(SITE_CONFIG as any, patch)
-  persist(SITE_CONFIG)
+  return persist(SITE_CONFIG)
 }
 
 /** 重置为默认并持久化 */
-export function resetSiteConfig() {
+export function resetSiteConfig(): boolean {
   Object.assign(SITE_CONFIG as any, DEFAULT_SITE_CONFIG)
-  persist(SITE_CONFIG)
+  return persist(SITE_CONFIG)
 }

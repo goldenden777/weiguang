@@ -1,12 +1,11 @@
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { SITE_CONFIG, updateSiteConfig } from '@/data/config'
+import { SITE_CONFIG } from '@/data/config'
 import SafeIcon from '@/components/common/SafeIcon.vue'
 
 interface Props {
@@ -17,7 +16,6 @@ defineProps<Props>()
 
 const formData = ref({
 siteName: SITE_CONFIG.siteName,
-  logoUrl: SITE_CONFIG.logoUrl,
   contactPhone: SITE_CONFIG.contactPhone,
   contactEmail: SITE_CONFIG.contactEmail || '',
   contactAddress: SITE_CONFIG.contactAddress || '',
@@ -25,73 +23,46 @@ siteName: SITE_CONFIG.siteName,
   successMessage: SITE_CONFIG.successMessage,
 })
 
-const logoPreview = ref(SITE_CONFIG.logoUrl)
 const isEditing = ref(false)
-const logoInputRef = ref<HTMLInputElement | null>(null)
 
 onMounted(() => {
-  // Initialize logo preview
-  logoPreview.value = formData.value.logoUrl
+  // no-op
 })
 
-// 同步到全局站点配置（以便全站 logo / 名称实时生效），并持久化到 localStorage
-watch(
-  formData,
-  (v) => {
-    updateSiteConfig({
-      siteName: v.siteName,
-      logoUrl: v.logoUrl,
-      contactPhone: v.contactPhone,
-      contactEmail: v.contactEmail,
-      contactAddress: v.contactAddress,
-      disclaimer: v.disclaimer,
-      successMessage: v.successMessage,
-    })
-  },
-  { deep: true }
-)
-
-const handleLogoChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      alert('文件大小不能超过 2MB')
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const result = e.target?.result as string
-      logoPreview.value = result
-      formData.value.logoUrl = result // 同步到表单数据，以便保存
-    }
-    reader.readAsDataURL(file)
-  }
+function getValue() {
+  return { ...formData.value }
 }
 
-const triggerLogoUpload = () => {
-  logoInputRef.value?.click()
+function setValue(v: Partial<typeof formData.value>) {
+  formData.value = { ...formData.value, ...v }
 }
 
-const removeLogo = () => {
-  logoPreview.value = ''
-  formData.value.logoUrl = ''
-  if (logoInputRef.value) {
-    logoInputRef.value.value = ''
-  }
-}
-
-const handleReset = () => {
-formData.value = {
+function resetToCurrentConfig() {
+  formData.value = {
     siteName: SITE_CONFIG.siteName,
-    logoUrl: SITE_CONFIG.logoUrl,
     contactPhone: SITE_CONFIG.contactPhone,
     contactEmail: SITE_CONFIG.contactEmail || '',
     contactAddress: SITE_CONFIG.contactAddress || '',
     disclaimer: SITE_CONFIG.disclaimer,
     successMessage: SITE_CONFIG.successMessage,
   }
-  logoPreview.value = SITE_CONFIG.logoUrl
+}
+
+defineExpose({
+  getValue,
+  setValue,
+  resetToCurrentConfig,
+})
+
+const handleReset = () => {
+formData.value = {
+    siteName: SITE_CONFIG.siteName,
+    contactPhone: SITE_CONFIG.contactPhone,
+    contactEmail: SITE_CONFIG.contactEmail || '',
+    contactAddress: SITE_CONFIG.contactAddress || '',
+    disclaimer: SITE_CONFIG.disclaimer,
+    successMessage: SITE_CONFIG.successMessage,
+  }
   isEditing.value = false
 }
 </script>
@@ -118,87 +89,6 @@ formData.value = {
           <p class="text-xs text-muted-foreground">
             当前显示：<span class="font-semibold">{{ formData.siteName }}</span>
           </p>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Logo -->
-    <Card>
-      <CardHeader>
-        <CardTitle class="text-lg">网站Logo</CardTitle>
-        <CardDescription>推荐尺寸：200x200px，支持PNG/JPG格式</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4">
-          <div class="flex flex-col md:flex-row gap-6">
-            <!-- Logo Preview -->
-            <div class="flex-shrink-0">
-              <div class="w-32 h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted overflow-hidden">
-                <img
-                  v-if="logoPreview"
-                  :src="logoPreview"
-                  alt="Logo Preview"
-                  class="w-full h-full object-cover"
-                />
-                <div v-else class="flex flex-col items-center justify-center text-muted-foreground">
-                  <SafeIcon name="Image" :size="32" />
-                  <span class="text-xs mt-2">预览</span>
-                </div>
-              </div>
-            </div>
-
-<!-- Upload Section -->
-            <div class="flex-1 space-y-4">
-              <div class="space-y-2">
-                <Label for="logoUpload">上传Logo</Label>
-                <div class="flex items-center gap-3">
-                  <input
-                    ref="logoInputRef"
-                    id="logoUpload"
-                    type="file"
-                    accept="image/png,image/jpeg"
-                    @change="handleLogoChange"
-                    class="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    @click="triggerLogoUpload"
-                    :disabled="!isClient"
-                    class="h-10"
-                  >
-                    <SafeIcon name="Upload" :size="16" class="mr-2" />
-                    选择新Logo
-                  </Button>
-                  <Button
-                    v-if="logoPreview"
-                    variant="ghost"
-                    size="sm"
-                    @click="removeLogo"
-                    :disabled="!isClient"
-                    class="h-10 text-destructive hover:bg-destructive/10"
-                  >
-                    <SafeIcon name="X" :size="16" class="mr-2" />
-                    移除
-                  </Button>
-                </div>
-              </div>
-              <div class="space-y-1">
-                <p class="text-xs text-muted-foreground">
-                  已选择 Logo。保存后将应用到全站页眉/侧边栏。
-                </p>
-                <details v-if="formData.logoUrl" class="text-xs text-muted-foreground">
-                  <summary class="cursor-pointer select-none hover:text-foreground">查看原始链接（base64/URL）</summary>
-                  <div class="mt-2 font-mono bg-muted px-2 py-1 rounded break-all">
-                    {{ formData.logoUrl }}
-                  </div>
-                </details>
-                <p class="text-[10px] text-muted-foreground opacity-70">
-                  支持格式：JPEG, PNG。最大限制：2MB。
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </CardContent>
     </Card>

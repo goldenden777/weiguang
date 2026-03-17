@@ -8,10 +8,12 @@ import BasicSettingsTab from './BasicSettingsTab.vue'
 import CategoryManagementTab from './CategoryManagementTab.vue'
 import FormFieldsConfigTab from './FormFieldsConfigTab.vue'
 import { toast } from 'vue-sonner'
+import { updateSiteConfig, resetSiteConfig } from '@/data/config'
 
 const isClient = ref(true)
 const activeTab = ref('basic')
 const isSaving = ref(false)
+const basicRef = ref<InstanceType<typeof BasicSettingsTab> | null>(null)
 
 onMounted(() => {
   isClient.value = false
@@ -24,11 +26,25 @@ onMounted(() => {
 const handleSave = async () => {
   isSaving.value = true
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.success('配置已保存成功')
+    // 目前先落地“基础设置”的保存（Logo/站点名等），其余 tab 后续再扩展
+    const basic = basicRef.value?.getValue?.()
+    if (!basic) {
+      throw new Error('basic_not_ready')
+    }
+    if (basic) {
+      const ok = updateSiteConfig({
+        siteName: basic.siteName,
+        contactPhone: basic.contactPhone,
+        contactEmail: basic.contactEmail,
+        contactAddress: basic.contactAddress,
+        disclaimer: basic.disclaimer,
+        successMessage: basic.successMessage,
+      })
+      if (!ok) throw new Error('persist_failed')
+    }
+    toast.success('保存成功')
   } catch (error) {
-    toast.error('保存失败，请重试')
+    toast.error('保存失败：页面未就绪或浏览器禁止/空间不足（可尝试刷新后重试或关闭无痕模式）')
   } finally {
     isSaving.value = false
   }
@@ -36,7 +52,9 @@ const handleSave = async () => {
 
 const handleReset = () => {
   if (confirm('确定要重置所有配置到默认值吗？此操作不可撤销。')) {
-    toast.success('已重置为默认配置')
+    const ok = resetSiteConfig()
+    basicRef.value?.resetToCurrentConfig?.()
+    toast[ok ? 'success' : 'error'](ok ? '已重置为默认配置' : '重置失败')
   }
 }
 </script>
@@ -93,7 +111,7 @@ const handleReset = () => {
 
         <!-- Basic Settings Tab -->
         <TabsContent value="basic" class="mt-6">
-          <BasicSettingsTab :is-client="isClient" />
+          <BasicSettingsTab ref="basicRef" :is-client="isClient" />
         </TabsContent>
 
         <!-- Category Management Tab -->

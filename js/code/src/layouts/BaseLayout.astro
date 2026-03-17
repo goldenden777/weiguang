@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { Toaster } from '@/components/ui/sonner'
 
 interface Props {
   title?: string;
@@ -28,6 +29,7 @@ const isMobile = mode === 'mobile';
     "min-h-screen",
     isMobile ? "bg-slate-100 dark:bg-slate-950" : "bg-slate-50"
   ]}>
+    <Toaster client:load richColors />
     {isMobile ? (
       /* Mobile Container Emulator */
       <div class="mx-auto w-full max-w-[430px] min-h-screen bg-background shadow-2xl relative overflow-x-hidden border-x border-border/50 flex flex-col font-sans">
