@@ -29,9 +29,9 @@ import {
 import SafeIcon from '@/components/common/SafeIcon.vue'
 import { Badge } from '@/components/ui/badge'
 import { getCurrentUser } from '@/lib/auth'
-import { MOCK_ENROLLMENTS, type EnrollmentModel, type EnrollmentStatus } from '@/data/enrollment'
+import { type EnrollmentModel, type EnrollmentStatus } from '@/data/enrollment'
 import { MOCK_ACTIVITIES } from '@/data/activity'
-import { updateEnrollmentStatus } from '@/services/enrollment.service'
+import { getEnrollmentsByActivityId, updateEnrollmentStatus } from '@/services/enrollment.service'
 
 // 从 URL ?id= 读取活动 ID，避免固定显示错误活动
 const activityId = ref('')
@@ -170,21 +170,24 @@ onMounted(() => {
   const params = new URLSearchParams(window.location.search)
   const id = params.get('id') || ''
   activityId.value = id
-  if (id) {
-    const activity = MOCK_ACTIVITIES.find(a => a.id === id)
-    if (activity) {
-      activityTitle.value = activity.title
-      organization.value = activity.agencyName
+  const init = async () => {
+    if (id) {
+      const activity = MOCK_ACTIVITIES.find(a => a.id === id)
+      if (activity) {
+        activityTitle.value = activity.title
+        organization.value = activity.agencyName
+      } else {
+        activityTitle.value = '未知活动'
+        organization.value = '-'
+      }
+      enrollmentsList.value = await getEnrollmentsByActivityId(id)
     } else {
-      activityTitle.value = '未知活动'
+      activityTitle.value = '请从「我的活动」点击报名管理进入'
       organization.value = '-'
+      enrollmentsList.value = []
     }
-    enrollmentsList.value = MOCK_ENROLLMENTS.filter(e => e.activityId === id)
-  } else {
-    activityTitle.value = '请从「我的活动」点击报名管理进入'
-    organization.value = '-'
-    enrollmentsList.value = []
   }
+  void init()
 })
 </script>
 

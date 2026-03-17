@@ -61,9 +61,16 @@ onMounted(() => {
       <p class="text-sm text-muted-foreground leading-relaxed px-4">
         工作人员将在 48 小时内完成信息核实，请保持手机通畅。
       </p>
-      <p class="text-sm text-primary font-medium mt-2 px-4">
-        使用报名手机号可在「报名查询」页随时查看报名记录。
-      </p>
+      <div class="mt-3 px-4">
+        <div class="rounded-xl border border-border/50 bg-primary/5 px-4 py-3 text-left">
+          <p class="text-sm text-foreground font-medium leading-relaxed">
+            提醒：你可以随时回到首页，通过「报名查询」输入手机号查看报名订单。
+          </p>
+          <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
+            建议保存报名编号，便于后续精确查询。
+          </p>
+        </div>
+      </div>
     </div>
 
     <CardContent class="px-4 space-y-6">
@@ -158,7 +165,7 @@ onMounted(() => {
       </div>
     </CardContent>
 
-<!-- Action Buttons -->
+    <!-- Action Buttons（不自动跳转，由用户自行决定） -->
     <div class="px-4 py-8 flex flex-col gap-3">
       <Button
         variant="default"
@@ -176,7 +183,7 @@ onMounted(() => {
         href="./home.html"
       >
         <SafeIcon name="Home" :size="18" class="mr-2" />
-        返回首页浏览更多
+        返回首页
       </Button>
       <Button
         variant="secondary"

@@ -26,6 +26,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import SafeIcon from '@/components/common/SafeIcon.vue'
+import { submitEnrollment } from '@/services/enrollment.service'
 
 interface Props {
   activity: ActivityModel
@@ -87,22 +88,17 @@ const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Generate enrollment number
-    const timestamp = Date.now().toString().slice(-6)
-    const random = Math.random().toString(36).substring(2, 5).toUpperCase()
-    enrollmentNumber.value = `BM-${timestamp}-${random}`
+    const { enrollmentId } = await submitEnrollment(props.activity.id, {
+      activityId: props.activity.id,
+      userName: values.name,
+      userPhone: values.phone,
+      idCard: values.idCard || undefined,
+      participantCount: Number(values.participantCount),
+      remark: values.remark || undefined,
+    })
+    enrollmentNumber.value = enrollmentId
     
     submitSuccess.value = true
-    
-    // Reset form after 2 seconds
-    setTimeout(() => {
-      resetForm()
-      submitSuccess.value = false
-      emit('close')
-    }, 2000)
   } catch (error) {
     console.error('Enrollment failed:', error)
   } finally {
@@ -116,6 +112,17 @@ watch(() => props.open, (newVal) => {
     submitSuccess.value = false
   }
 })
+
+const goHome = () => {
+  if (typeof window === 'undefined') return
+  window.location.href = './home.html'
+}
+
+const closeManually = () => {
+  resetForm()
+  submitSuccess.value = false
+  emit('close')
+}
 </script>
 
 <template>
@@ -138,6 +145,16 @@ watch(() => props.open, (newVal) => {
             <p class="text-xs text-muted-foreground mt-2">请妥善保管，用于查询报名状态</p>
           </DialogDescription>
         </DialogHeader>
+
+        <div class="mt-6 space-y-3">
+          <Button type="button" class="w-full" @click="goHome">
+            <SafeIcon name="Home" :size="16" class="mr-2" />
+            回到首页
+          </Button>
+          <Button type="button" variant="outline" class="w-full" @click="closeManually">
+            我知道了（关闭）
+          </Button>
+        </div>
       </template>
 
       <!-- Form State -->
