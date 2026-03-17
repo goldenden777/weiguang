@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,6 +49,7 @@ const itemsPerPage = 10
 // 当前活动的报名列表（ref 以便在「确认/取消」后本地更新状态，对接后端后可改为接口拉取）
 const enrollmentsList = ref<EnrollmentModel[]>([])
 const enrollments = computed<EnrollmentModel[]>(() => enrollmentsList.value)
+const isLoading = ref(false)
 
 // Computed (enrollments 已是按 activityId 过滤的列表)
 const filteredEnrollments = computed(() => {
@@ -113,10 +114,12 @@ if (!isClient.value) return
   const csvContent = [
     headers.join(','),
     ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
-  ].join('\n')
+  ].join('\r\n')
   
   // Download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  // Excel 在 Windows 上打开 UTF-8 CSV 常出现乱码；加 BOM 可让 Excel 正确识别 UTF-8
+  const csvWithBom = `\uFEFF${csvContent}`
+  const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)
   link.setAttribute('href', url)
@@ -163,31 +166,69 @@ const setEnrollmentStatus = async (enrollmentId: string, status: 'confirmed' | '
   }
 }
 
-// Lifecycle：从 URL 读取活动 ID 并解析活动信息，拉取该活动的报名列表
-onMounted(() => {
-  isMounted.value = true
+async function fetchEnrollments() {
+  if (!activityId.value) return
+  isLoading.value = true
+  try {
+    enrollmentsList.value = await getEnrollmentsByActivityId(activityId.value)
+    // 保持当前分页在合法范围内
+    const nextTotal = Math.max(1, Math.ceil(enrollmentsList.value.length / itemsPerPage))
+    if (currentPage.value > nextTotal) currentPage.value = nextTotal
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function initFromUrl() {
   if (typeof window === 'undefined') return
   const params = new URLSearchParams(window.location.search)
   const id = params.get('id') || ''
   activityId.value = id
-  const init = async () => {
-    if (id) {
-      const activity = MOCK_ACTIVITIES.find(a => a.id === id)
-      if (activity) {
-        activityTitle.value = activity.title
-        organization.value = activity.agencyName
-      } else {
-        activityTitle.value = '未知活动'
-        organization.value = '-'
-      }
-      enrollmentsList.value = await getEnrollmentsByActivityId(id)
+  if (id) {
+    const activity = MOCK_ACTIVITIES.find(a => a.id === id)
+    if (activity) {
+      activityTitle.value = activity.title
+      organization.value = activity.agencyName
     } else {
-      activityTitle.value = '请从「我的活动」点击报名管理进入'
+      activityTitle.value = '未知活动'
       organization.value = '-'
-      enrollmentsList.value = []
     }
+  } else {
+    activityTitle.value = '请从「我的活动」点击报名管理进入'
+    organization.value = '-'
+    enrollmentsList.value = []
   }
-  void init()
+}
+
+function onWindowFocus() {
+  // 重新聚焦时刷新一次，方便“用户报名后后台打开的页面自动更新”
+  void fetchEnrollments()
+}
+
+function onStorageChange(e: StorageEvent) {
+  // 其他标签页提交报名会写 localStorage，触发本页刷新
+  if (!e.key) return
+  if (e.key === 'wg:enrollments:v1') {
+    void fetchEnrollments()
+  }
+}
+
+// Lifecycle：从 URL 读取活动 ID，并拉取该活动的报名列表
+onMounted(() => {
+  isMounted.value = true
+  initFromUrl()
+  if (activityId.value) void fetchEnrollments()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('focus', onWindowFocus)
+    window.addEventListener('storage', onStorageChange)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('focus', onWindowFocus)
+    window.removeEventListener('storage', onStorageChange)
+  }
 })
 </script>
 

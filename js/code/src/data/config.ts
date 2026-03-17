@@ -1,5 +1,5 @@
 
-import { reactive } from 'vue'
+import { reactive, toRaw } from 'vue'
 
 export interface FormFieldConfig {
   id: string;
@@ -59,7 +59,9 @@ function loadPersisted(): Partial<SiteConfig> | null {
 function persist(config: SiteConfig) {
   if (!isClient()) return
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
+    // reactive 对象直接 JSON.stringify 可能被序列化为空对象；先 toRaw 再拷贝保证可序列化
+    const raw = toRaw(config) as SiteConfig
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...raw }))
   } catch {
     // ignore
   }
